@@ -1,0 +1,32 @@
+{% extends "PA001_Deltares/base.html" %}
+
+{% load static %}
+
+{% block content %}
+  <h1 style="color: white;">RESULT</h1>
+  <div class="row">
+    <div class="col-md-4 offset-md-4">
+      <h2 style="color: white;">Check Result</h2>      
+        <div class="cart">
+          <dliv class="card-body">
+            <form action="" method="POST">{% csrf_token %}
+              {% for r in consult %}
+                <div class="form-group">
+                  <input type="text" id="txt_id_GPPD" name="txt_id_GPPD" value="{{r.id_GPPD}}" class="form-control"
+                  minlength="6" maxlength="6" readonly required>
+                  <input type="text" id="txt_f_name" name="txt_f_name" value="{{r.f_name}}" class="form-control"
+                  minlength="6" maxlength="6" readonly required>
+                                
+                <img class="intro-img img-fluid mb-10  mb-lg-0 rounded" src="C:/mfuentes/GPP_output/visualization.png" alt="">  
+                </div>
+              {% endfor %}            
+              <div class="form-group">              
+                <a href="{% url 'Result' %}" class=" btn btn-info">Go Back</a>
+              </div>              
+            </form>
+          </dliv>
+        </div>        
+    </div>
+  </div>    
+      
+{% endblock %}
