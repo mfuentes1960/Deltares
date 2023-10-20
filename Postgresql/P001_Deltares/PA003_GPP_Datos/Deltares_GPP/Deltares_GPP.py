@@ -141,6 +141,12 @@ from dateutil.relativedelta import relativedelta
 import time 
 import PA003_GPP_Datos.Deltares_GPP.calc_footprint_FFP_climatology as ffpmodule
 from PA001_Deltares.models import myuploadfile, meteoUploadfile, GPPD, resultfile
+import io
+# Importa los módulos necesarios de Django
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+csv_buffer = io.StringIO()  # Crea un objeto StringIO en memoria
                    
 # Built-in class so that the original code can be executed in Django
 
@@ -824,6 +830,15 @@ class Process:
 
         df.to_csv(outputfile, sep=sep, na_rep=str(undef), index=True, date_format=timeformat)        
         #df.to_csv(outputfile)
+        df.to_csv(csv_buffer, index=False)  # Escribe el DataFrame en el buffer CSV sin incluir el índice
+        # Guarda el contenido del buffer CSV en el archivo en el servidor
+        with default_storage.open(outputname, 'w') as fileout:
+            fileout.write(csv_buffer.getvalue())
+             
+
+        # Limpia el buffer CSV
+        csv_buffer.close()
+
                 
         resultfile(id_GPPD=ID, f_name=meteoname, file=outputfile, type_file= "csv").save()
 

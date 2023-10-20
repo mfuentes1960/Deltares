@@ -1,0 +1,36 @@
+{% extends "PA001_Deltares/base.html" %}
+
+{% load static %}
+
+{% block content %}
+  <h1 style="color: white;">RESULT</h1>
+    
+      <div class="table-responsive">
+        <table class="table table-striped" style="color: white;">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Description</th>
+              <th>User</th>
+              <th>Date of Creation</th>
+              <th>Option</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in gppd %}
+              <tr>
+                <td>{{r.id_GPPD}}</td>
+                <td>{{r.description}}</td>
+                <td>{{r.user}}</td>
+                <td>{{r.created}}</td>
+                <td><a href="consultResult/{{r.id_GPPD}}" class="btn btn-info">Consult</a></td>
+              </tr>      
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+   
+
+  
+
+{% endblock %}

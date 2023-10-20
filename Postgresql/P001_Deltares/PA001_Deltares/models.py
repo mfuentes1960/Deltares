@@ -97,7 +97,7 @@ class GPPDOption(models.Model):
     undef                               = models.FloatField(default=-9999 , null = False, blank=False)
     swthr                               = models.FloatField(default=20 , null = False, blank=False)
     outputfile                          = models.CharField(max_length=20, default="/NEE_output/" , null = False, blank=False)
-    outputname                          = models.CharField(max_length=40, default="NEE_corrected_with_flags.xlsx" , null = False, blank=False)
+    outputname                          = models.CharField(max_length=40, default="NEE_corrected_with_flags.csv" , null = False, blank=False)
     outundef                            = models.BooleanField(default=False , null = False, blank=False)
     outflagcols                         = models.BooleanField(default=False , null = False, blank=False)
    
