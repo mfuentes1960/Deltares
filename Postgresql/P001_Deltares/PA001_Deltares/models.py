@@ -212,15 +212,6 @@ class GPPDOption(models.Model):
     class Meta:
         verbose_name="GPPOption"
         verbose_name="GPPOptions"
-class GPPD(models.Model):
-    id_GPPD    =models.CharField(max_length=30 , null = False, blank=False)
-    description=models.CharField(max_length=250,  null = False, blank=False)
-    user       =models.CharField(max_length=150,  null = False, blank=False)
-    created    =models.DateTimeField(auto_now_add=True)
-    updated    =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.id_GPPD
 
 class resultfile(models.Model):
     id_GPPD  =models.CharField(max_length=30 , null = False, blank=False)
@@ -229,6 +220,19 @@ class resultfile(models.Model):
     type_file=models.CharField(max_length=7)
     created  =models.DateTimeField(auto_now_add=True)
     updated  =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.id_GPPD
+
+
+
+
+class GPPD(models.Model):
+    id_GPPD    =models.CharField(max_length=30 , null = False, blank=False)
+    description=models.CharField(max_length=250,  null = False, blank=False)
+    user       =models.CharField(max_length=150,  null = False, blank=False)
+    created    =models.DateTimeField(auto_now_add=True)
+    updated    =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.id_GPPD

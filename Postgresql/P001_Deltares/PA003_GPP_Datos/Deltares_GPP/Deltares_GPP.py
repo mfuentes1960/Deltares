@@ -784,6 +784,7 @@ class Process:
         t61 = ptime.time()
         
         outputfile = outputdir +  outputfile + ID + '_' +  outputname                                  #Change 34. Create outputfile in case outputfile and outputdir are available     
+        outputname = ID + '_1_' +  outputname
         print('      Write output ', outputfile)
 
         # Back to original units
@@ -828,19 +829,17 @@ class Process:
 
         print('      Write.')
 
-        df.to_csv(outputfile, sep=sep, na_rep=str(undef), index=True, date_format=timeformat)        
+        #df.to_csv(outputfile, sep=sep, na_rep=str(undef), index=True, date_format=timeformat)        
         #df.to_csv(outputfile)
         df.to_csv(csv_buffer, index=False)  # Escribe el DataFrame en el buffer CSV sin incluir el índice
         # Guarda el contenido del buffer CSV en el archivo en el servidor
         with default_storage.open(outputname, 'w') as fileout:
             fileout.write(csv_buffer.getvalue())
-             
-
         # Limpia el buffer CSV
         csv_buffer.close()
-
+        csv_buffer = io.StringIO()  # Crea un objeto StringIO en memoria
                 
-        resultfile(id_GPPD=ID, f_name=meteoname, file=outputfile, type_file= "csv").save()
+        resultfile(id_GPPD=ID, f_name=meteoname, file=outputname, type_file= "csv").save()
 
         t62   = ptime.time()
         strin = ( '{:.1f} [minutes]'.format((t62 - t61) / 60.)                                             #Change 37. Change legend of computation time.          
@@ -899,8 +898,15 @@ class Process:
             df_gpp_smoth  = df_gpp_smoth.rolling(rolling_window_gpp, center=rolling_center_gpp, min_periods=rolling_min_periods).mean()
 
             # save file of daily GPP
-            df_gpp_smoth.to_csv(outputdir + "/GPP_output/" + ID + "_GPP_daily.csv")
-            resultfile(id_GPPD=ID, f_name=meteoname, file=outputdir + "/GPP_output/" + ID + "_GPP_daily.csv", type_file= "csv").save()
+            #df_gpp_smoth.to_csv(outputdir + "/GPP_output/" + ID + "_GPP_daily.csv")
+            df_gpp_smoth.to_csv(csv_buffer, index=False)  # Escribe el DataFrame en el buffer CSV sin incluir el índice
+            # Guarda el contenido del buffer CSV en el archivo en el servidor
+            with default_storage.open(ID + "_2_GPP_daily.csv", 'w') as fileout:
+                fileout.write(csv_buffer.getvalue())
+            # Limpia el buffer CSV
+            csv_buffer.close()
+            csv_buffer = io.StringIO()  # Crea un objeto StringIO en memoria
+            resultfile(id_GPPD=ID, f_name=meteoname, file=ID + "_2_GPP_daily.csv", type_file= "csv").save()
             
             # save time series plot
             model = '_rei_f'

@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'P001_Deltares.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'DBDeltares',
+        'NAME': 'Deltares2',
         'USER': 'postgres',
         'PASSWORD': 'Y2k26059@',
         'HOST': '127.0.0.1',
