@@ -1,0 +1,73 @@
+<script>
+    mapboxgl.accessToken = 'TU_CLAVE_DE_ACCESO_MAPBOX'; // Reemplaza con tu clave de acceso
+  
+    navigator.geolocation.getCurrentPosition(successLocation, errorLocation, {
+      enableHighAccuracy: true
+    });
+  
+    function successLocation(position) {
+      const longitude = position.coords.longitude;
+      const latitude = position.coords.latitude;
+  
+      const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [longitude, latitude],
+        zoom: 12
+      });
+  
+      map.on('load', function () {
+        map.addLayer({
+          id: 'places',
+          type: 'circle',
+          source: {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: [
+                {
+                  type: 'Feature',
+                  properties: {},
+                  geometry: {
+                    type: 'Point',
+                    coordinates: [longitude, latitude]
+                  }
+                }
+              ]
+            }
+          },
+          paint: {
+            'circle-radius': 10,
+            'circle-color': '#3887be'
+          }
+        });
+  
+        // Geocodificación inversa
+        map.on('click', 'places', function (e) {
+          const coordinates = e.features[0].geometry.coordinates.slice();
+          const locationNameElement = document.getElementById('locationName');
+  
+          // Obtener el nombre del lugar con la API de geocodificación inversa de Mapbox
+          fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${mapboxgl.accessToken}`)
+            .then(response => response.json())
+            .then(data => {
+              const locationName = data.features[0].place_name;
+              locationNameElement.textContent = `Nombre del lugar: ${locationName}`;
+            });
+        });
+  
+        map.on('mouseenter', 'places', function () {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+  
+        map.on('mouseleave', 'places', function () {
+          map.getCanvas().style.cursor = '';
+        });
+      });
+    }
+  
+    function errorLocation() {
+      console.log('Unable to retrieve your location');
+    }
+  </script>
+  

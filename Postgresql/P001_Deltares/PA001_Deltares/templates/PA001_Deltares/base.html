@@ -21,7 +21,7 @@
 
   <div style="text-align: right; margin-right: 100px; color: white;">      
     {% if user.is_authenticated %}        
-      Hola {{ user.username }} &nbsp;&nbsp; <a href="{% url 'Logout_User' %}" style="color: white">Cerrar sesión</a>
+      Hello {{ user.username }} &nbsp;&nbsp; <a href="{% url 'Logout_User' %}" style="color: white">Sign off</a>
     {% endif %}
   </div>
 
@@ -43,7 +43,14 @@
             </li>
             <li class="nav-item {% if request.path == '/result/' %} active {% endif %} px-lg-4">
               <a class="nav-link text-uppercase text-expanded" href="{% url 'Result' %}">Result</a>
-            </li>
+              <li class="nav-item {% if request.path == '/maps/' %} active {% endif %} px-lg-4">
+                <a class="nav-link text-uppercase text-expanded" href="{% url 'Maps' %}">Maps</a>  
+              <li class="nav-item {% if request.path == '/links/' %} active {% endif %} px-lg-4">
+                <a class="nav-link text-uppercase text-expanded" href="{% url 'LinkUrls' %}">Links</a>  
+              </li>
+              <li class="nav-item {% if request.path == '/climateRisk/' %} active {% endif %} px-lg-4">
+                <a class="nav-link text-uppercase text-expanded" href="{% url 'ClimateRisk' %}">Climate Risk</a>  
+              </li>
           </ul>
         </div>          
       {% endif %}                        

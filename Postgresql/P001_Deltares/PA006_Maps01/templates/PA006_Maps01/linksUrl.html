@@ -1,0 +1,24 @@
+{% extends "PA001_Deltares/base.html" %}
+
+{% load static %}
+
+{% block content %}
+ 
+<head>
+    <meta charset="UTF-8">
+    <title>Links</title>
+    
+
+</head>
+<body>
+    <h4 style="color: white;">Links</h4>
+    
+    <ul>
+        {% for r in linkUrls %}
+            <td>{{r.nombre}}</td>
+            <td> <a href={{r.url}} target="_blank">{{r.url}}</a> </td>   
+        {% endfor %}    
+    </ul>
+</body>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "PA001_Deltares/base.html" %}
+
+{% load static %}
+
+{% block content %}
+ 
+<head>
+    <meta charset="UTF-8">
+    <title>Create Points</title>
+    
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />    
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css" type="text/css"/>
+    <link href="https://unpkg.com/mapbox-gl@2.6.1/dist/mapbox-gl.css" rel="stylesheet">
+    
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
+    
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+
+	<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    <script src="https://unpkg.com/mapbox-gl@2.6.1/dist/mapbox-gl.js"></script>
+    <link rel="stylesheet" href="{% static 'PA001_Deltares/css/maps.css' %}">
+
+</head>
+<body>
+    <h4 style="color: white;">Create Points</h4>
+    <form method="post" enctype="multipart/form-data" style="color: white;">
+        <div class="form-group" style='padding: 2em'>  
+            {% csrf_token %}
+                       
+                <div class="col-md-10" style='text-align: right'>
+                    <label for="id_nombre">    Name:</label> <input type="text" name="nombre" maxlength="255" required id="id_nombre">
+                    <label for="id_latitud">  Latitude:</label> <input type="number" name="latitud" step="any" required id="id_latitud">
+                    <label for="id_longitud">Length:</label> <input type="number" name="longitud" step="any" required id="id_longitud">
+                    <label for="id_description"> description:</label> <input type="text" name="description" maxlength="255" required id="id_description">
+                </div>
+                <div id='map'>
+                    <script src="{% static 'PA001_Deltares/js/maps.js' %}"></script>                                                                              
+                </div>
+                <input type="submit" value="Save" style="margin-left: 968pt;">  
+        </div>    
+    </form>
+    <script> var geocoder = new MapboxGeocoder({accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl,}); map.addControl(geocoder, 'top-left'); </script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    
+</body>
+
+{% endblock %}

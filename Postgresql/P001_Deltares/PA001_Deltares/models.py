@@ -1,4 +1,6 @@
 from django.db import models
+#from django.contrib.gis.db import models
+from mapbox_location_field.models import LocationField
 
 # Create your models here.
 class Función(models.Model):
@@ -216,16 +218,24 @@ class GPPDOption(models.Model):
 class resultfile(models.Model):
     id_GPPD  =models.CharField(max_length=30 , null = False, blank=False)
     f_name   =models.CharField(max_length=255 , null = False, blank=False)
-    file     =models.CharField(max_length=250,  null = False, blank=False)
-    type_file=models.CharField(max_length=7)
+    file     =models.FileField(upload_to="" , null = False, blank=False)  
+    type_file=models.BooleanField(default=False) 
     created  =models.DateTimeField(auto_now_add=True)
     updated  =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.id_GPPD
+    
+class imagefile(models.Model):
+    id_GPPD  =models.CharField(max_length=30 , null = False, blank=False)
+    f_name   =models.CharField(max_length=255 , null = False, blank=False)
+    image_texto=models.CharField(max_length=255, default="html")
+    image    =models.ImageField(upload_to="")
+    created  =models.DateTimeField(auto_now_add=True)
+    updated  =models.DateTimeField(auto_now_add=True)
 
-
-
+    def __str__(self):
+        return self.id_GPPD
 
 class GPPD(models.Model):
     id_GPPD    =models.CharField(max_length=30 , null = False, blank=False)
@@ -236,3 +246,33 @@ class GPPD(models.Model):
 
     def __str__(self):
         return self.id_GPPD
+    
+class Points(models.Model):
+    nombre     =models.CharField(max_length=255)
+    latitud    =models.FloatField(default=51.98595)
+    longitud   =models.FloatField(default=4.38017)
+    description=models.CharField(max_length=250,  null = False, blank=False, default="destription missing")
+    #poligono   =models.PolygonField()
+    created    =models.DateTimeField(auto_now_add=True)
+    updated    =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name="Point"
+        verbose_name="Points"
+
+class LinkUrl(models.Model):
+    nombre =models.CharField(max_length=255)
+    url    = models.URLField(blank=True, null=True)
+    created=models.DateTimeField(auto_now_add=True)
+    updated=models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name="LinkUrl"
+        verbose_name="LinkUrls"
+

@@ -21,5 +21,9 @@ urlpatterns = [
     path('', include('PA001_Deltares.urls')),
     path('deltares/', include('PA002_Deltares.urls')),
     path('gppd/', include('PA003_GPP_Datos.urls')),
-    path('result/', include('PA004_Result.urls')),    
+    path('result/', include('PA004_Result.urls')), 
+    path('maps/', include('PA005_Maps.urls')),    
+    path('links/', include('PA006_Maps01.urls')), 
+    path('climateRisk/', include('PA007_ClimateRisk.urls')), 
+    
 ]

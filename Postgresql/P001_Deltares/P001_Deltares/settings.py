@@ -44,7 +44,13 @@ INSTALLED_APPS = [
     'PA002_Deltares',
     'PA003_GPP_Datos',
     'PA004_Result',
-    'crispy_forms',
+    'PA005_Maps',
+    'PA006_Maps01',
+    'PA007_ClimateRisk',
+    'crispy_forms', 
+    'bootstrap4'
+    'mapbox_location_field',
+    'django.contrib.gis',
 ]
 
 MIDDLEWARE = [
@@ -135,6 +141,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT= os.path.join(BASE_DIR, 'media')
@@ -156,3 +165,5 @@ MESSAGE_TAGS={
     mensajes_de_error.ERROR: 'danger',
 
 }
+
+MAPBOX_KEY = 'pk.eyJ1IjoibWZ1ZW50ZXNhZ3VpbGFyIiwiYSI6ImNsb3NpeXduZzAweHkyaWxsazEzNDFtZmIifQ.7JDeB6ht_cYYH6uPzEBC9Q'
