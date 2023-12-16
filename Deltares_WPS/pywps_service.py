@@ -141,79 +141,42 @@ from dateutil.relativedelta import relativedelta
 import time 
 import calc_footprint_FFP_climatology as ffpmodule
 
-
 from django.core.files.base import ContentFile
 import io
 import base64
 import altair_saver
 import json
                 
-
-
-
-
 # pywps_service.py
-from flask import Flask, request, jsonify
+from flask import Flask, request 
+
 import psycopg2
 import sys
-from django.core.files.uploadedfile import InMemoryUploadedFile
-
-
-
+from io import SEEK_CUR, BytesIO, StringIO
 
 app = Flask(__name__)
 
-# Configuración de la conexión a la base de datos
-
-
-connection = psycopg2.connect(
-    dbname="Deltares1",
-    user="postgres",
-    password="Y2k26059@",
-    host="localhost",
-    port="5432"
-)
 @app.route('/pywps', methods=['POST'])
 
 def pywps_service():
     # Procesa los datos recibidos desde el formulario Django
-    # Puedes acceder a los datos con request.form
-    campo1 = request.form.get('ID')
-    campo2 = request.form.get('description')
-    print("Línea 22")
-    campo3 = campo1 + campo2
-    print(campo3)
-
-
-
-
-
-
+    archivos_recibidos = request.files
+    #i = 0
+    #for nombre_archivo, archivo in archivos_recibidos.items():
+    #        contenido = archivo.read()
+    #        print(nombre_archivo)
+    #        print("linea 167")
+    #        print("")
+    #        if i == 0:
+    #            print(contenido) 
+    #        i+=1
+     
     # Realiza las operaciones necesarias con los datos
     # ...
     x = 0
     if x == 0:
     #try:
-        # Establecer conexión a la base de datos
-        #connection = psycopg2.connect(**db_config)
-        #cursor = connection.cursor()
-
-        # Obtener datos del JSON de la solicitud
-        #data = request.get_json()
-
-        # Crear una consulta SQL para insertar un nuevo lugar
-        #query = f"""
-        #    INSERT INTO lugares (nombre, ubicacion)
-        #    VALUES ('{data['nombre']}', ST_Point({data['longitud']}, {data['latitud']}, 4326));
-        #"""
-
-        # Ejecutar la consulta
-        #cursor.execute(query)
-
-        # Confirmar la transacción
-        #conn.commit()
-
-        #return jsonify({'mensaje': 'Lugar agregado exitosamente'}), 201
+        
         #Function to identify columns with specific beggining
         #Funtions defined here can be used in each module of the workflow
         def _findfirststart(starts, names):
@@ -231,7 +194,8 @@ def pywps_service():
         unit = request.form.get('unit')
         
         
-        
+        print("pywps línea 208")
+        print(user)
         if os.path.exists(unit+user ) == False:
             os.mkdir(unit+user)
             os.makedirs(unit+user+"/EV_output")
@@ -386,81 +350,31 @@ def pywps_service():
         if skiprows:
             import json  # to analyse int or list, tuple not working
             skiprows = json.loads(skiprows.replace('(', '[').replace(')', ']'))
-            
+        print('      Read data: ')              
         # Read input files into Panda data frame and check variable availability
-        parser = lambda date: dt.datetime.strptime(date, timeformat)                               
-        parser = lambda date: dt.datetime.strptime(date, timeformat) 
                                        
+        parser = lambda date: dt.datetime.strptime(date, timeformat) 
         
-        filename    = request.form.get("name") 
-        print("PyWps Línea 388 filename" )
-        print(filename)       
-        #uploadFile=myuploadfile.objects.filter(f_name=filename) 
-        print("PyWps Línea 391 filename" )
-        # Ejecutar la consulta
-        # Crear un cursor
-        cursor = connection.cursor()
-
-        # Consulta a la base de datos PostgreSQL
-        sentencia_sql = f"""
-            SELECT file
-            FROM public."PA001_Deltares_myuploadfile" WHERE f_name = %s;
-            """
-        cursor.execute(sentencia_sql, (filename,))
-
-         # Obtener los resultados
-        uploadFile = cursor.fetchall()
-        # Utiliza la función type() para obtener el tipo de dato
-        tipo_de_dato = type(uploadFile)
-
-        # Imprime el resultado
-        print("El tipo de dato de mi_variable es:", tipo_de_dato) 
-        print(uploadFile)  
-
-        print("PyWPS Línea 414")       
-        i = 0 
-        for f in uploadFile:
-            print("PyWPS Línea 417")
-            if isinstance(f[0], InMemoryUploadedFile):
-                # Aquí puedes manipular el objeto InMemoryUploadedFile como lo necesites
-                 print("Es un objeto InMemoryUploadedFile")
+        i = 0
+        
+        for nombre_archivo, archivo in archivos_recibidos.items():
+         
+            if i==0: 
+                try:
+                    file_content = archivo.read().decode('utf-8')
+                    df_meteo_station = pd.read_csv(StringIO(file_content), sep=',', skiprows=0, parse_dates=[0], date_parser=parser, index_col=0)
+                except pd.errors.EmptyDataError:
+                    print("Empty Data Error")
+            elif i==1:
+                file_content = archivo.read().decode('utf-8')
+                df = pd.read_csv(StringIO(file_content), sep=',', skiprows=0, parse_dates=[0], date_parser=None, index_col=0, header=0)
+                eufluxfile = nombre_archivo
             else:
-                # Si no es un objeto InMemoryUploadedFile, es probable que sea el nombre del archivo
-                nombre_archivo = f[0]
-                print("Nombre del archivo no es inMemoryUploadedfile:", nombre_archivo)
-            # Utiliza la función type() para obtener el tipo de dato
-            #f.file = 'C:/Users/Usuario/Documents/Fuentes/Deltares/Postgis/P001_Deltares/media/' + str(f.file) 
-            print(f[0])
-            tipo_de_dato = type(f[0])
-            
-
-                        # Imprime el resultado
-            print("El tipo de dato de mi_variable es:", tipo_de_dato)                    
-            if i == 0:
-                eufluxfile = [f[i]]
-                infile = eufluxfile[i].open('r')                
-                df = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0], 
-                        date_parser=parser, index_col=0, header=0)                
-            else:
-                eufluxfile.append(f.file)
-                infile = eufluxfile[i].open('r')
-                df_aux_2a = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0],
-                                date_parser=parser, index_col=0, header=0)
-                df = df.append(df_aux_2a, sort=False)                
+                file_content = archivo.read().decode('utf-8')
+                df_aux_2af = pd.read_csv(StringIO(file_content), sep=',', skiprows=0, parse_dates=[0], date_parser=None, index_col=0, header=0)
+                df = df.append(df_aux_2af, sort=False)
             i += 1 
-        print('      Read data: ', eufluxfile)              
-        ########################## Inicio Lineas incorporadas temporalmente mientras se encuentra una mejor solución
-        try:
-            uploadFile=meteoUploadfile.objects.filter(f_name=meteoname)
-            for f in uploadFile:                
-                first_file = f.file                
-                infile2 = first_file.open('r')                                
-                df_meteo_station = pd.read_csv(infile2, parse_dates=[0], date_parser=parser, index_col = [0])                                                
-        except:
-            return jsonify({'error': "Time data does not match format '%Y-%m-%d %H:%M:%S'" + ", in file: " + str(infile2)})
-            
-        ########################## Fin Lineas incorporadas temporalmente mientras se encuentra una mejor solución
-        GPPD(id_GPPD=ID, description=request.form.get("description"), user=user).save() 
+
         #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
         #2.b)   Ensure constant 30-minute frequency in the datasets    
         print('      Ensuring 30-minute frequncy: ', eufluxfile)
@@ -505,8 +419,15 @@ def pywps_service():
         #isday = df['SW_IN'] > swthr                                                                       #This column in the data frame indicates the short wave radiation which
         hsw = ['SW_IN']                                                                                    #can be use to identify difference between day an night. Threshold is set in the configuration file
         hout = _findfirststart(hsw, df.columns)                                                            #Change 7. Use _findfirststart method to look for the SW_IN column
+        print("Línea 413 tipo de variable hout y contenido")
+        print(type(df[hout[0]]))
+        print(df[hout[0]])
+        print("Línea 416 tipo de variable swthr y contenido")
+        print(type(swthr))
+        print(swthr)
+        
         isday = df[hout[0]] >= swthr
-        print("801")
+       
         if remove_SW_IN:                                                                                   # Remove 'SW_IN' data from the data frame to not be used in the GPP flux partitioning in case the data is not available for the year of study but is calculated from other years' mean values 
             df['SW_IN']=-9999.                                                                             #Change 7.1 Remove SW_IN. This change is just relevant for the study case of Doñana National Park
             df['SW_IN'].replace(-9999., np.nan, inplace=True)                                              #The change might also be needed when SW_IN takes negative values. Integrated negative SW_IN values in the model formulation might result in negative GPP. This require to be evaluated.

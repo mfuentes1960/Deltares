@@ -3,9 +3,13 @@ from django.contrib import messages
 from PA001_Deltares.models import GPPDOption,myuploadfile, meteoUploadfile, GPPD
 from .forms import GPPOptionsForm
 import datetime as dtx
+from .Deltares_GPP import llamar_servicio_pywps
 
 import requests
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+import pandas as pd
+from django.http import HttpResponseRedirect
+from django.http import HttpResponse
+
 
 # Create your views here.
     
@@ -43,29 +47,58 @@ def gppd(request):
         else: 
             meteo_name= request.POST.get("ID") + "_" + request.POST.get("user") + "_" + str(dtx.datetime.now())
             f_name = meteo_name 
-            name  = meteo_name     
-
-            # Preparar los archivos para enviar al servicio PyWPS
-            ii=0
-            archivos_para_enviar = {}
+            name  = meteo_name    
+            # Crear un DataFrame vacío para acumular el contenido
+            df_acumulado = pd.DataFrame()
             
+            if len(df_acumulado) < 1000:  
+                return redirect("GPPD")
+            
+        
+            myfiles = request.FILES.getlist("uploadfiles")  
+            i = 0           
+            for f in myfiles:
+                myuploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=f).save()
+                #if i == 0:
+                    #contenido_csv = f.read()
+                    #df_actual = pd.read_csv(io.StringIO(contenido_csv.decode('utf-8')))
+                    #df_acumulado = pd.concat([df_acumulado, df_actual], ignore_index=True)
+                    #infile =f.open('r')                
+                    #df_acumulado = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0], 
+                    #                date_parser=parser, index_col=0, header=0) 
+                #else:                    
+                    #infile = f.open('r')
+                    #df_aux_2a = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0],
+                    #            date_parser=parser, index_col=0, header=0)
+                    #df_acumulado = df_acumulado.append(df_aux_2a, sort=False)  
+                #i += 1
+                contenido = f.read().decode('utf-8')
+                df_acumulado.append(contenido)
+            if len(df_acumulado) == 0:  
+                return redirect("GPPD")
+                                    
+            # Convertir el DataFrame acumulado a un archivo CSV
+            contenido_acumulado_csv = df_acumulado.to_csv(index=False)
+            print("archivo contenido_acumulado_csv")
+            print(contenido_acumulado_csv)
+
+            # Crear un DataFrame vacío para contenido unico
+            #df_unico = pd.DataFrame()
             myfiles = request.FILES.getlist("meteo_file")            
-            for i, archivo in enumerate(myfiles):
-                ii+=1
-                #meteoUploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=archivo).save() 
-                # Reinicia el puntero del archivo
-                #archivo.seek(0)
-                archivos_para_enviar[f"archivo{ii}"] = (archivo.name, archivo)
-                
-                
-            myfiles = request.FILES.getlist("uploadfiles")        
-            for i, archivo in enumerate(myfiles):
-                ii+=1
-                #myuploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=archivo).save()
-                # Reinicia el puntero del archivo
-                #archivo.seek(0)
-                archivos_para_enviar[f"archivo{ii}"] = (archivo.name, archivo)
-                 
+            for f in myfiles:
+                meteoUploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=f).save() 
+                #contenido_csv = f.read()
+                #df_actual = pd.read_csv(io.StringIO(contenido_csv.decode('utf-8')))
+                #df_unico = pd.concat([df_unico, df_actual], ignore_index=True)
+                infile2 = f.open('r')                                
+                df_unico = pd.read_csv(infile2, parse_dates=[0], date_parser=parser, index_col = [0])                                 
+
+            # Convertir el DataFrame unico a un archivo CSV
+            contenido_unico_csv = df_unico.to_csv(index=False)
+            print("archivo contenido_unico_csv")
+            print(contenido_unico_csv)
+
+        
         GPPOptions_Form = GPPOptionsForm(request.POST)             
       
         if GPPOptions_Form.is_valid():                        
@@ -166,13 +199,19 @@ def gppd(request):
                               "training_dataset":                     int(request.POST.get("training_dataset")),
                               "scale_getRegion":                      int(request.POST.get("scale_getRegion")),                         
                               "vector_scale":                         int(request.POST.get("vector_scale")),   
+                              "meteoname":                                meteo_name,
                               "name":                                     f_name,
-                              "meteoname":                                meteo_name,}                 
-
-
-            # Hacer la solicitud al servicio PyWPS
+                              'upload_files':                             df_acumulado,
+                              'meteo_file':                               contenido_unico_csv,          }                       
+                  
+            # Llamar al servicio PyWPS con los datos del formulario
+            #campo1 =   request.POST.get("ID")
+            #campo2 =  request.POST.get("description")
+            # Enviar datos al servicio PyWPS
             url_pywps = 'http://127.0.0.1:5000/pywps'
-            response = requests.post(url_pywps, files=archivos_para_enviar, data=gppdDiccionario)
+            #payload = {'campo1': campo1, 'campo2': campo2}
+            payload = gppdDiccionario
+            response = requests.post(url_pywps, data=payload)
             
             # Procesar la respuesta del servicio PyWPS
             if response.status_code == 200:
