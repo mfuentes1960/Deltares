@@ -3,10 +3,9 @@ from django.contrib import messages
 from PA001_Deltares.models import GPPDOption,myuploadfile, meteoUploadfile, GPPD
 from .forms import GPPOptionsForm
 import datetime as dtx
-from .Deltares_GPP import llamar_servicio_pywps
 
 import requests
-from django.http import HttpResponseRedirect
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 # Create your views here.
     
@@ -44,15 +43,29 @@ def gppd(request):
         else: 
             meteo_name= request.POST.get("ID") + "_" + request.POST.get("user") + "_" + str(dtx.datetime.now())
             f_name = meteo_name 
-            name  = meteo_name            
-            myfiles = request.FILES.getlist("uploadfiles")            
-            for f in myfiles:
-                myuploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=f).save() 
+            name  = meteo_name     
 
+            # Preparar los archivos para enviar al servicio PyWPS
+            ii=0
+            archivos_para_enviar = {}
+            
             myfiles = request.FILES.getlist("meteo_file")            
-            for f in myfiles:
-                meteoUploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=f).save() 
-        
+            for i, archivo in enumerate(myfiles):
+                ii+=1
+                meteoUploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=archivo).save() 
+                #Reinicia el puntero del archivo
+                archivo.seek(0)
+                archivos_para_enviar[f"archivo{ii}"] = (archivo.name, archivo)
+                
+                
+            myfiles = request.FILES.getlist("uploadfiles")        
+            for i, archivo in enumerate(myfiles):
+                ii+=1
+                myuploadfile(id_GPPD=request.POST.get("ID"),f_name=name, file=archivo).save()
+                # Reinicia el puntero del archivo
+                archivo.seek(0)
+                archivos_para_enviar[f"archivo{ii}"] = (archivo.name, archivo)
+                 
         GPPOptions_Form = GPPOptionsForm(request.POST)             
       
         if GPPOptions_Form.is_valid():                        
@@ -153,17 +166,13 @@ def gppd(request):
                               "training_dataset":                     int(request.POST.get("training_dataset")),
                               "scale_getRegion":                      int(request.POST.get("scale_getRegion")),                         
                               "vector_scale":                         int(request.POST.get("vector_scale")),   
-                              "meteoname":                                meteo_name,
-                              "name":                                     f_name}                       
-                  
-            # Llamar al servicio PyWPS con los datos del formulario
-            #campo1 =   request.POST.get("ID")
-            #campo2 =  request.POST.get("description")
-            # Enviar datos al servicio PyWPS
+                              "name":                                     f_name,
+                              "meteoname":                                meteo_name,}                 
+
+
+            # Hacer la solicitud al servicio PyWPS
             url_pywps = 'http://127.0.0.1:5000/pywps'
-            #payload = {'campo1': campo1, 'campo2': campo2}
-            payload = gppdDiccionario
-            response = requests.post(url_pywps, data=payload)
+            response = requests.post(url_pywps, files=archivos_para_enviar, data=gppdDiccionario)
             
             # Procesar la respuesta del servicio PyWPS
             if response.status_code == 200:
