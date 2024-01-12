@@ -1,0 +1,71 @@
+<html>
+
+<head>
+
+ {% load static %}
+
+  <!-- Bootstrap -->
+  <link href="{% static 'PA001_Deltares/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <!-- Fonts -->    
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i" rel="stylesheet">     
+  <!-- Styles -->
+  <link href="{% static 'PA001_Deltares/css/gestion1.css' %}" rel="stylesheet">
+</head>
+
+<body>
+
+  <h1 class="site-heading text-center text-white d-none d-lg-block">      
+    <span class="site-heading-lower">Deltares</span>
+  </h1>
+
+  <div style="text-align: right; margin-right: 100px; color: white;">      
+    {% if user.is_authenticated %}        
+      Hello {{ user.username }} &nbsp;&nbsp; <a href="{% url 'Logout_User' %}" style="color: white">Sign off</a>
+    {% endif %}
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark py-lg-4" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand text-uppercase text-expanded font-weight-bold d-lg-none" href="{% url 'Login_User' %}">Deltares</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controlU="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      {% if user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav mx-auto">
+            <li class="nav-item {% if request.path == '/deltares/' %} active {% endif %} px-lg-4">
+              <a class="nav-link text-uppercase text-expanded" href="{% url 'Deltares' %}">Home</a>
+            </li>
+            <li class="nav-item {% if request.path == '/gppd/' %} active {% endif %} px-lg-4">
+              <a class="nav-link text-uppercase text-expanded" href="{% url 'GPPD' %}">GPPD</a>
+            </li>
+            <li class="nav-item {% if request.path == '/result/' %} active {% endif %} px-lg-4">
+              <a class="nav-link text-uppercase text-expanded" href="{% url 'Result' %}">Result</a>
+            </li>
+            <li class="nav-item {% if request.path == '/maps/' %} active {% endif %} px-lg-4">
+              <a class="nav-link text-uppercase text-expanded" href="{% url 'Maps' %}">Maps</a> 
+            </li>
+            <li class="nav-item {% if request.path == '/links/' %} active {% endif %} px-lg-4">
+              <a class="nav-link text-uppercase text-expanded" href="{% url 'LinkUrls' %}">Links</a>  
+            </li>  
+            
+          </ul>
+        </div>          
+      {% endif %}                        
+    </div>
+  </nav>
+    
+  <!-- Contenido variable-->
+  {% block content %}  
+   
+  {% endblock %}    
+
+    <!-- Bootstrap -->
+    <script src="{% static 'PA001_Deltares/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'PA001_Deltares/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+</body>
+
+</html>

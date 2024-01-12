@@ -1,0 +1,480 @@
+{% extends "PA001_Deltares/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if messages %}
+        <br/><br/><br/>
+        {% for mensaje in messages %}
+            <span class="alert alert-{{mensaje.tags}}"> {{mensaje}} </span>             
+        {% endfor %}
+        <br/><br/><br/>
+{% endif %}
+
+<form action="" method="POST" enctype="multipart/form-data" style="color: white;">
+
+    <h3>POSTSWITCH</h3>
+
+    <div class="form-group" style='padding: 2em'>
+                
+        {% csrf_token %}
+        
+                <div class="row" style="font-size: small;">
+                    
+                    <div class="col-md-3" style='text-align: right' >                        
+                        <label for="id_option"> ID </label>
+                        {{GPPOptions_Form.id_option}}
+                    </div>
+                    
+                    <div class="col-md-3" style='text-align: right' >                        
+                        <label for="description"> Description </label>
+                        <input type="text" id="description" name="description">
+                        
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.outlier}} 
+                        <label> outlier</label><br>                       
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.ustar}} 
+                        <label> ustar</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.ustar_non_annual}} 
+                        <label for="ustar_non_annual"> ustar_non_annual</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.partition}} 
+                        <label for="partition"> partition</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.fill}} 
+                        <label for="fill"> fill</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.fluxerr}} 
+                        <label for="fluxerr"> fluxerr</label><br>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.daily_gpp}} 
+                        <label for="daily_gpp"> daily_gpp</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.climatological_footprint}} 
+                        <label for="climatological_footprint"> climatological_footprint</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.calculated_ffp}} 
+                        <label for="calculated_ffp"> calculated_ffp</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.vegetation_indices}} 
+                        <label for="vegetation_indices"> vegetation_indices</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.environmental_variables_station}} 
+                        <label for="environmental_variables_station"> environmental_variables_station</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.environmental_variables_satellite}} 
+                        <label for="environmental_variables_satellite"> environmental_variables_satellite</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.tower_observations}} 
+                        <label for="tower_observations"> tower_observations</label><br>
+                    </div>
+                                        
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.df_rainfall_station_switch}} 
+                        <label for="df_rainfall_station_switch"> df_rainfall_station_switch</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.df_meteo_station_switch}} 
+                        <label for="df_meteo_station_switch"> df_meteo_station_switch</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.df_rainfall_chirps_switch}} 
+                        <label for="df_rainfall_chirps_switch"> df_rainfall_CHIRPS_switch</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.df_temp_modis_switch}} 
+                        <label for="df_temp_modis_switch"> df_temp_MODIS_switch</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.df_meteo_tower_switch}} 
+                        <label for="df_meteo_tower_switch"> df_meteo_tower_switch</label><br>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.correlation_analysis}} 
+                        <label for="correlation_analysis"> correlation_analysis</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.correlation_analysis_simple}} 
+                        <label for="correlation_analysis_simple"> correlation_analysis_simple</label><br>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.rei_gpp_switch}} 
+                        <label for="rei_gpp_switch"> rei_gpp_switch</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.fal_gpp_switch}} 
+                        <label for="fal_gpp_switch"> fal_gpp_switch</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.las_gpp_switch}} 
+                        <label for="las_gpp_switch"> las_gpp_switch</label><br>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.calibration_validation}} 
+                        <label for="calibration_validation"> calibration_validation</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.modis_analysis}} 
+                        <label for="modis_analysis"> MODIS_analysis</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.timeseries_thirty}} 
+                        <label for="timeseries_thirty"> timeseries_thirty</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.timeseries_fifteen}} 
+                        <label for="timeseries_fifteen"> timeseries_fifteen</label><br>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.mapping_gpp}} 
+                        <label for="mapping_gpp"> mapping_GPP</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.classification_maps}} 
+                        <label for="classification_maps"> classification_maps</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.maps_from_features}} 
+                        <label for="maps_from_features"> maps_from_features</label><br>
+                    </div>
+
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.mapping_gpp_thirty}} 
+                        <label for="mapping_gpp_thirty"> mapping_GPP_thirty</label><br>
+                    </div>
+    
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.mapping_gpp_fifteen}} 
+                        <label for="mapping_gpp_fifteen"> mapping_GPP_fifteen</label><br>
+                    </div>
+                
+                    <div class="col-md-3">
+                        {{GPPOptions_Form.export_maps_to_drive}} 
+                        <label for="export_maps_to_drive"> export_maps_to_drive</label><br>
+                    </div>
+
+                    <div class="col-md-3" >
+                        {{GPPOptions_Form.outundef}} 
+                        <label for="outundef"> outundef</label><br>                        
+                    </div>                                
+
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.outflagcols}} 
+                        <label for="outflagcols"> outflagcols</label><br>                        
+                    </div>       
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.remove_sw_in}} 
+                        <label for="remove_sw_in"> remove_SW_IN</label><br>                        
+                    </div>       
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.seasonout}} 
+                        <label for="seasonout"> seasonout</label><br>                        
+                    </div>       
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.applyustarflag}} 
+                        <label for="applyustarflag"> applyustarflag</label><br>                        
+                    </div>       
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.nogppnight}} 
+                        <label for="nogppnight"> nogppnight</label><br>                        
+                    </div>   
+                    <div class="col-md-3"> 
+                        {{GPPOptions_Form.rolling_center_gpp}} 
+                        <label for="rolling_center_gpp"> rolling_center_gpp</label><br>                        
+                    </div>       
+                </div>                                              
+                <div class="row" style="font-size: small;">    
+                    <div class="col-md-5" style='text-align: right;'>                        
+                        <label for="timeformat"> time format</label>
+                        {{GPPOptions_Form.timeformat}}                        
+                    </div>
+
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="sep"> separator</label>
+                        {{GPPOptions_Form.sep}}                        
+                    </div>                                
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="skiprows"> skiprows </label>
+                        {{GPPOptions_Form.skiprows}}
+                        
+                    </div>                                
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="undef"> undef</label>
+                        {{GPPOptions_Form.undef}}
+                    </div>                                
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="swthr"> swthr</label>
+                        {{GPPOptions_Form.swthr}}
+                    </div>                                
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="outputfile"> outputfile </label>
+                        {{GPPOptions_Form.outputfile}}
+                    </div>                                
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="outputname"> outputname </label>
+                        {{GPPOptions_Form.outputname}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="carbonflux"> carbonflux </label>
+                        {{GPPOptions_Form.carbonflux}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="nscan"> nscan </label>
+                        {{GPPOptions_Form.nscan}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="nfill"> nfill </label>
+                        {{GPPOptions_Form.nfill}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="z"> z </label>
+                        {{GPPOptions_Form.z}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="deriv"> deriv </label>
+                        {{GPPOptions_Form.deriv}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="ustarmin"> ustarmin </label>
+                        {{GPPOptions_Form.ustarmin}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="nboot"> nboot </label>
+                        {{GPPOptions_Form.nboot}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="plateaucrit"> plateaucrit </label>
+                        {{GPPOptions_Form.plateaucrit}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="sw_dev"> sw_dev </label>
+                        {{GPPOptions_Form.sw_dev}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="ta_dev"> ta_dev </label>
+                        {{GPPOptions_Form.ta_dev}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="vpd_dev"> vpd_dev </label>
+                        {{GPPOptions_Form.vpd_dev}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="longgap"> longgap </label>
+                        {{GPPOptions_Form.longgap}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="carbonfluxlimit"> carbonfluxlimit </label>
+                        {{GPPOptions_Form.carbonfluxlimit}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="respirationlimit"> respirationlimit </label>
+                        {{GPPOptions_Form.respirationlimit}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rolling_window_gpp"> rolling_window_gpp </label>
+                        {{GPPOptions_Form.rolling_window_gpp}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rolling_min_periods"> rolling_min_periods </label>
+                        {{GPPOptions_Form.rolling_min_periods}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="altitude"> altitude </label>
+                        {{GPPOptions_Form.altitude}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="latitude"> latitude </label>
+                        {{GPPOptions_Form.latitude}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="longitude"> longitude </label>
+                        {{GPPOptions_Form.longitude}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="canopy_height"> canopy_height </label>
+                        {{GPPOptions_Form.canopy_height}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="displacement_height"> displacement_height </label>
+                        {{GPPOptions_Form.displacement_height}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="roughness_lenght"> roughness_lenght </label>
+                        {{GPPOptions_Form.roughness_lenght}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="instrument_height_anenometer"> instrument_height_anenometer </label>
+                        {{GPPOptions_Form.instrument_height_anenometer}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="instrument_height_gas_analyzer"> instrument_height_gas_analyzer </label>
+                        {{GPPOptions_Form.instrument_height_gas_analyzer}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="projection_site_utm_zone"> projection_site_UTM_zone </label>
+                        {{GPPOptions_Form.projection_site_utm_zone}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="boundary_layer_height"> boundary_layer_height </label>
+                        {{GPPOptions_Form.boundary_layer_height}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="domaint_var"> domaint_var </label>
+                        {{GPPOptions_Form.domaint_var}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="nxt_var"> nxt_var </label>
+                        {{GPPOptions_Form.nxt_var}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rst_var"> rst_var </label>
+                        {{GPPOptions_Form.rst_var}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="max_cloud_coverage"> max_cloud_coverage </label>
+                        {{GPPOptions_Form.max_cloud_coverage}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="crs"> crs </label>
+                        {{GPPOptions_Form.crs}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="ndvimask"> ndviMask </label>
+                        {{GPPOptions_Form.ndvimask}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="mndvimask"> mndviMask </label>
+                        {{GPPOptions_Form.mndvimask}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rolling_window_ev_meteo"> rolling_window_ev_meteo </label>
+                        {{GPPOptions_Form.rolling_window_ev_meteo}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rolling_window_ev_meteo_sat"> rolling_window_ev_meteo_sat </label>
+                        {{GPPOptions_Form.rolling_window_ev_meteo_sat}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="rolling_window_gpp_modis"> rolling_window_gpp_MODIS </label>
+                        {{GPPOptions_Form.rolling_window_gpp_modis}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="precipitation_data"> precipitation_data </label>
+                        {{GPPOptions_Form.precipitation_data}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="scale_satellite_data"> scale_satellite_data </label>
+                        {{GPPOptions_Form.scale_satellite_data}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="feature_collection"> feature_collection </label>
+                        {{GPPOptions_Form.feature_collection}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="ecosystem_extension"> ecosystem_extension </label>
+                        {{GPPOptions_Form.ecosystem_extension}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="number_clusters"> number_clusters </label>
+                        {{GPPOptions_Form.number_clusters}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="training_scale"> training_scale </label>
+                        {{GPPOptions_Form.training_scale}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="training_dataset"> training_dataset </label>
+                        {{GPPOptions_Form.training_dataset}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="scale_getregion"> scale_getRegion </label>
+                        {{GPPOptions_Form.scale_getregion}}
+                    </div>
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="vector_scale"> vector_scale </label>
+                        {{GPPOptions_Form.vector_scale}}
+                    </div>                    
+                    
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="uploadfiles"> upload files </label>
+                        <input type="file" multiple name="uploadfiles"><br>
+                    </div>    
+                    
+                    <div class="col-md-5" style='text-align: right' >                        
+                        <label for="meteo_file">  meteo file </label>
+                        <input type="file" name="meteo_file"><br>
+                    </div>    
+                                       
+                </div>    
+
+                <input type="hidden" name="user" value='{{user.username}}'><br>
+                {{GPPOptions_Form.unit}}
+                {{GPPOptions_Form.outputdir}}
+                                      
+        <button type="submit" class="btn btn-success">Process</button>  
+        
+    </div>
+       
+</form>
+<script>
+    function validarCampo() {
+        // Obtener el valor del campo de texto
+        var valorCampo = document.getElementById("description").value;
+
+        // Verificar si el campo está vacío
+        if (valorCampo === "") {
+            alert("El campo de texto no puede estar vacío.");
+            return false; // Impedir que el formulario se envíe
+        }
+
+        // Si el campo no está vacío, permitir que el formulario se envíe
+        return true;
+    }
+</script>
+    
+{% endblock %}
