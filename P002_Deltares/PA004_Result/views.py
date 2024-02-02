@@ -10,5 +10,6 @@ def result(request):
     return render(request,"PA004_Result/result.html",{"gppd": gppd})
 
 def consultResult(request, code):
-    consult= Pa001PostgisResultfile.objects.filter(id_Pa001PostgisGppd=code)
+    #consult= Pa001PostgisResultfile.objects.filter(id_Pa001PostgisGppd=code)
+    consult= Pa001PostgisResultfile.objects.filter(id_gpp=code)
     return render(request,"PA004_Result/resultConsult.html",{"consult": consult})

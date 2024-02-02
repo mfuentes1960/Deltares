@@ -93,7 +93,7 @@ WSGI_APPLICATION = "P002_Deltares.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        'NAME': 'Deltares2',
+        'NAME': 'Deltares',
         'USER': 'postgres',
         'PASSWORD': 'Y2k26059@',
         'HOST': '127.0.0.1',

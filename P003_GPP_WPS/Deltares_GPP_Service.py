@@ -1364,13 +1364,10 @@ def pywps_service():
         print('      Write.')
 
         csv_content = df.to_csv(index=False)  # Escribe el DataFrame en el buffer CSV sin incluir el índice        
-        i_resultfile=Pa001PostgisResultfile()
-        i_resultfile.id=55551
+        i_resultfile=Pa001PostgisResultfile()        
         i_resultfile.id_gpp=id_option
         i_resultfile.f_name=outputname          
         i_resultfile.type_file=False         
-        i_resultfile.created = timezone.now()
-        i_resultfile.updated = timezone.now()
         i_resultfile.file.save(outputname, ContentFile(csv_content))
         i_resultfile.save()
 
@@ -1433,15 +1430,11 @@ def pywps_service():
             # save file of daily GPP            
             csv_content = df_gpp_smoth.to_csv(index=False)  # Escribe el DataFrame en el buffer CSV sin incluir el índice
             daily_file = id_option + "_2_GPP_daily.csv"
-            i_resultfile=Pa001PostgisResultfile()
-            i_resultfile.id=55571
+            i_resultfile=Pa001PostgisResultfile()            
             i_resultfile.id_gpp=id_option
             i_resultfile.f_name=id_option + "_2_GPP_daily.csv"
-            i_resultfile.type_file=False            
-            i_resultfile.created = timezone.now()
-            i_resultfile.updated = timezone.now()
-            i_resultfile.file.save(daily_file, ContentFile(csv_content))
-                    
+            i_resultfile.type_file=False                        
+            i_resultfile.file.save(daily_file, ContentFile(csv_content))                    
             i_resultfile.save()     
 
             # save time series plot
@@ -1465,7 +1458,7 @@ def pywps_service():
                 ]).properties(width=600, height=300)
 
             chart.save("C:/Files/media/" + id_option + "_3_GPP_daily.html")
-            i_resultfile=Pa001PostgisResultfile(id=55891, id_gpp=id_option, f_name=id_option + "_3_GPP_daily.html",file=id_option + "_3_GPP_daily.html",type_file=True, created=timezone.now(), updated=timezone.now())
+            i_resultfile=Pa001PostgisResultfile(id_gpp=id_option, f_name=id_option + "_3_GPP_daily.html",file=id_option + "_3_GPP_daily.html",type_file=True)
             i_resultfile.save()        
                                
             t72   = ptime.time()

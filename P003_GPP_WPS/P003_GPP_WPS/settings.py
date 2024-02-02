@@ -85,7 +85,7 @@ DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         #"ENGINE": "django.contrib.gis.db.backends.postgis",
-        'NAME': 'Deltares2',
+        'NAME': 'Deltares',
         'USER': 'postgres',
         'PASSWORD': 'Y2k26059@',
         'HOST': '127.0.0.1',

@@ -19,11 +19,11 @@
           <tbody>
             {% for r in gppd %}
               <tr>
-                <td>{{r.id_GPPD}}</td>
+                <td>{{r.id_gpp}}</td>
                 <td>{{r.description}}</td>
                 <td>{{r.user}}</td>
                 <td>{{r.created}}</td>
-                <td><a href="consultResult/{{r.id_GPPD}}" class="btn btn-info">Consult</a></td>
+                <td><a href="consultResult/{{r.id_gpp}}" class="btn btn-info">Consult</a></td>
               </tr>      
               {% endfor %}
           </tbody>

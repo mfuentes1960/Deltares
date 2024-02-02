@@ -6,22 +6,21 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.core.files.base import ContentFile
 
-class Pa001PostgisGppd(models.Model):
-    #id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisGppd(models.Model):    
     id_gpp = models.CharField(max_length=30)
     description = models.CharField(max_length=250)
     user = models.CharField(max_length=150)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_gppd'
 
 
-class Pa001PostgisGppdoption(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisGppdoption(models.Model):    
     unit = models.CharField(max_length=3)
     id_option = models.CharField(max_length=30)
     outputdir = models.CharField(max_length=255)
@@ -120,95 +119,88 @@ class Pa001PostgisGppdoption(models.Model):
     vector_scale = models.IntegerField()
     vector_scalex = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_gppdoption'
 
 
-class Pa001PostgisImagefile(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisImagefile(models.Model):    
     id_gpp = models.CharField(max_length=30)
     f_name = models.CharField(max_length=255)
     image_texto = models.CharField(max_length=255)
     image = models.ImageField(upload_to="")
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_imagefile'
 
 
-class Pa001PostgisLinkurl(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisLinkurl(models.Model):    
     nombre = models.CharField(max_length=255)
     description = models.TextField()
     url = models.URLField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_linkurl'
 
 
-class Pa001PostgisMeteouploadfile(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisMeteouploadfile(models.Model):    
     id_gpp = models.CharField(max_length=30)
     f_name = models.CharField(max_length=255)
     file = models.FileField(upload_to="" , null = False, blank=False)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_meteouploadfile'
 
 
-class Pa001PostgisMyuploadfile(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisMyuploadfile(models.Model):    
     id_gpp = models.CharField(max_length=30)
     f_name = models.CharField(max_length=255)
     file = models.FileField(upload_to="" , null = False, blank=False)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_myuploadfile'
 
 
-class Pa001PostgisPoints(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisPoints(models.Model):    
     nombre = models.CharField(max_length=255)
     latitud = models.FloatField()
     longitud = models.FloatField()
     description = models.CharField(max_length=250)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_points'
 
 
-class Pa001PostgisResultfile(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class Pa001PostgisResultfile(models.Model):    
     id_gpp = models.CharField(max_length=30)
     f_name = models.CharField(max_length=255)
     file = models.FileField(upload_to="" , null = False, blank=False)  
     type_file = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
         db_table = 'PA001_PostGis_resultfile'
 
 
-class AuthGroup(models.Model):
-    id = models.IntegerField(primary_key=True)
+class AuthGroup(models.Model):    
     name = models.CharField(unique=True, max_length=150)
 
     class Meta:
@@ -216,8 +208,7 @@ class AuthGroup(models.Model):
         db_table = 'auth_group'
 
 
-class AuthGroupPermissions(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class AuthGroupPermissions(models.Model):    
     group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
     permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
 
@@ -227,8 +218,7 @@ class AuthGroupPermissions(models.Model):
         unique_together = (('group', 'permission'),)
 
 
-class AuthPermission(models.Model):
-    id = models.IntegerField(primary_key=True)
+class AuthPermission(models.Model):    
     name = models.CharField(max_length=255)
     content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
     codename = models.CharField(max_length=100)
@@ -239,8 +229,7 @@ class AuthPermission(models.Model):
         unique_together = (('content_type', 'codename'),)
 
 
-class AuthUser(models.Model):
-    id = models.IntegerField(primary_key=True)
+class AuthUser(models.Model):    
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(blank=True, null=True)
     is_superuser = models.BooleanField()
@@ -257,8 +246,7 @@ class AuthUser(models.Model):
         db_table = 'auth_user'
 
 
-class AuthUserGroups(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class AuthUserGroups(models.Model):    
     user = models.ForeignKey(AuthUser, models.DO_NOTHING)
     group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
 
@@ -268,8 +256,7 @@ class AuthUserGroups(models.Model):
         unique_together = (('user', 'group'),)
 
 
-class AuthUserUserPermissions(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class AuthUserUserPermissions(models.Model):    
     user = models.ForeignKey(AuthUser, models.DO_NOTHING)
     permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
 
@@ -279,8 +266,7 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
-class DjangoAdminLog(models.Model):
-    id = models.IntegerField(primary_key=True)
+class DjangoAdminLog(models.Model):    
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
     object_repr = models.CharField(max_length=200)
@@ -294,8 +280,7 @@ class DjangoAdminLog(models.Model):
         db_table = 'django_admin_log'
 
 
-class DjangoContentType(models.Model):
-    id = models.IntegerField(primary_key=True)
+class DjangoContentType(models.Model):    
     app_label = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
 
@@ -305,8 +290,7 @@ class DjangoContentType(models.Model):
         unique_together = (('app_label', 'model'),)
 
 
-class DjangoMigrations(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+class DjangoMigrations(models.Model):    
     app = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     applied = models.DateTimeField()
