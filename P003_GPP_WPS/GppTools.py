@@ -45,7 +45,7 @@ class Gpp:
 
         return
     
-    def read_parameters(self, configfilepath):
+    def read_parameters(self, gppdDiccionario):
         # 1a)   Read configuration file
         # 1a.a) Read from command-line interpreter (It must include in the cosole "Deltares_GPP.py Configuration_file.cfg" and config file must be located in the same path)
         # if len(sys.argv) <= 1:
@@ -53,165 +53,168 @@ class Gpp:
         # configfile = sys.argv[1]
                                                                                              
         # 1a.b)Read from directory path
-        configfile = configfilepath                                               
+        #configfile = configfilepath                                               
         
         # 1a.c)Read from gui window. Activate to manually select the congifuration file
         # configfile = hf.files_from_gui(initialdir='.', title='configuration file')
         
-        config = configparser.ConfigParser(interpolation=None)                                             
-        config.read(configfile)                                                                            
+        #config = configparser.ConfigParser(interpolation=None)                                             
+        #config.read(configfile)                                                                            
 
         # 1b) Assign variables from configuration file
  
         # Input and output paths
-        self.ID            = config['GENERAL'].get('ID',        ".")
-        self.inputdir      = config['GENERAL'].get('inputdir',  ".")                                            
-        self.outputdir     = config['GENERAL'].get('outputdir', ".")
+        self.ID            = gppdDiccionario['id_option']
+        self.description   = gppdDiccionario['description']
+        self.unit          = gppdDiccionario['unit']
+        self.user          = gppdDiccionario['user']
+        #self.inputdir      = gppdDiccionario['inputdir']
+        self.outputdir     = gppdDiccionario['outputdir']
 
         # Meteorological data
-        self.meteo_file    = config['METHEO'].get('meteo_file', ".")
+        #self.meteo_file    = gppdDiccionario['meteo_file']
         
         # Program switches. They activates each module of the workflow
         #------------------------------------------------------------
-        self.outlier           = config['POSTSWITCH'].getboolean('outlier',              True)
-        self.ustar             = config['POSTSWITCH'].getboolean('ustar',                True)
-        self.ustar_non_annual  = config['POSTSWITCH'].getboolean('ustar_non_annual',     True)                  
-        self.partition         = config['POSTSWITCH'].getboolean('partition',            True)                                     
-        self.fill              = config['POSTSWITCH'].getboolean('fill',                 True)                                     
-        self.fluxerr           = config['POSTSWITCH'].getboolean('fluxerr',              True)
+        self.outlier           = gppdDiccionario['outlier']
+        self.ustar             = gppdDiccionario['ustar']
+        self.ustar_non_annual  = gppdDiccionario['ustar_non_annual']               
+        self.partition         = gppdDiccionario['partition']                                  
+        self.fill              = gppdDiccionario['fill']                                   
+        self.fluxerr           = gppdDiccionario['fluxerr']
         #------------------------------------------------------------
-        self.daily_gpp                 =  config['POSTSWITCH'].getboolean('daily_gpp',                   True)  
+        self.daily_gpp                 =  gppdDiccionario['daily_gpp']
         #------------------------------------------------------------
-        self.climatological_footprint  =  config['POSTSWITCH'].getboolean('climatological_footprint',    True) 
-        self.calculated_ffp            =  config['POSTSWITCH'].getboolean('calculated_ffp',             False)    
+        self.climatological_footprint  =  gppdDiccionario['climatological_footprint']
+        self.calculated_ffp            =  gppdDiccionario['calculated_ffp']
         #------------------------------------------------------------
-        self.vegetation_indices        =  config['POSTSWITCH'].getboolean('vegetation_indices',          True)
+        self.vegetation_indices        =  gppdDiccionario['vegetation_indices']
         #------------------------------------------------------------
-        self.environmental_variables_station     =  config['POSTSWITCH'].getboolean('environmental_variables_station',           True)
-        self.environmental_variables_satellite   =  config['POSTSWITCH'].getboolean('environmental_variables_satellite',         True)
-        self.tower_observations                  =  config['POSTSWITCH'].getboolean('tower_observations',                        True)
-        self.rei_gpp_switch                      =  config['POSTSWITCH'].getboolean('rei_gpp_switch ',                           True)
-        self.fal_gpp_switch                      =  config['POSTSWITCH'].getboolean('fal_gpp_switch ',                           False)
-        self.las_gpp_switch                      =  config['POSTSWITCH'].getboolean('las_gpp_switch ',                           False)
+        self.environmental_variables_station     =  gppdDiccionario['environmental_variables_station']
+        self.environmental_variables_satellite   =  gppdDiccionario['environmental_variables_satellite']
+        self.tower_observations                  =  gppdDiccionario['tower_observations']
+        self.rei_gpp_switch                      =  gppdDiccionario['rei_gpp_switch ']
+        self.fal_gpp_switch                      =  gppdDiccionario['fal_gpp_switch ']
+        self.las_gpp_switch                      =  gppdDiccionario['las_gpp_switch ']
         
-        self.df_rainfall_station_switch = config['POSTSWITCH'].getboolean('df_rainfall_station_switch',      True)
-        self.df_meteo_station_switch    = config['POSTSWITCH'].getboolean('df_meteo_station_switch',         True)
-        self.df_rainfall_CHIRPS_switch  = config['POSTSWITCH'].getboolean('df_rainfall_CHIRPS_switch',       True)
-        self.df_temp_MODIS_switch       = config['POSTSWITCH'].getboolean('df_temp_MODIS_switch',            True)
-        self.df_meteo_tower_switch      = config['POSTSWITCH'].getboolean('df_meteo_tower_switch',           True)
+        self.df_rainfall_station_switch = gppdDiccionario['df_rainfall_station_switch']
+        self.df_meteo_station_switch    = gppdDiccionario['df_meteo_station_switch']
+        self.df_rainfall_CHIRPS_switch  = gppdDiccionario['df_rainfall_CHIRPS_switch']
+        self.df_temp_MODIS_switch       = gppdDiccionario['df_temp_MODIS_switch']
+        self.df_meteo_tower_switch      = gppdDiccionario['df_meteo_tower_switch']
         
         #------------------------------------------------------------
-        self.correlation_analysis        =  config['POSTSWITCH'].getboolean('correlation_analysis',          True)
-        self.correlation_analysis_simple =  config['POSTSWITCH'].getboolean('correlation_analysis',          True)
-        self.calibration_validation      =  config['POSTSWITCH'].getboolean('calibration_validation',        True) 
-        self.MODIS_analysis              =  config['POSTSWITCH'].getboolean('MODIS_analysis',                True) 
+        self.correlation_analysis        =  gppdDiccionario['correlation_analysis']
+        self.correlation_analysis_simple =  gppdDiccionario['correlation_analysis']
+        self.calibration_validation      =  gppdDiccionario['calibration_validation']
+        self.MODIS_analysis              =  gppdDiccionario['MODIS_analysis']
         #------------------------------------------------------------
-        self.timeseries_thirty           =  config['POSTSWITCH'].getboolean('timeseries_thirty',        True) 
-        self.timeseries_fifteen          =  config['POSTSWITCH'].getboolean('timeseries_fifteen',       True) 
-        self.mapping_GPP                 =  config['POSTSWITCH'].getboolean('mapping_GPP',              True)
-        self.classification_maps         =  config['POSTSWITCH'].getboolean('classification_maps',      True)
-        self.maps_from_features          =  config['POSTSWITCH'].getboolean('maps_from_features',       True)
-        self.mapping_GPP_thirty          =  config['POSTSWITCH'].getboolean('mapping_GPP_thirty',       True)
-        self.mapping_GPP_fifteen         =  config['POSTSWITCH'].getboolean('mapping_GPP_fifteen',      True)
-        self.export_maps_to_drive        =  config['POSTSWITCH'].getboolean('export_maps_to_drive',    False) 
+        self.timeseries_thirty           =  gppdDiccionario['timeseries_thirty']
+        self.timeseries_fifteen          =  gppdDiccionario['timeseries_fifteen']
+        self.mapping_GPP                 =  gppdDiccionario['mapping_GPP']
+        self.classification_maps         =  gppdDiccionario['classification_maps']
+        self.maps_from_features          =  gppdDiccionario['maps_from_features']
+        self.mapping_GPP_thirty          =  gppdDiccionario['mapping_GPP_thirty']
+        self.mapping_GPP_fifteen         =  gppdDiccionario['mapping_GPP_fifteen']
+        self.export_maps_to_drive        =  gppdDiccionario['export_maps_to_drive']
         
         # input file format
-        self.eufluxfile  = config['POSTIO'].get('eufluxfile',            '')
-        self.timeformat  = config['POSTIO'].get('timeformat',  '%Y%m%d%H%M')
-        self.sep         = config['POSTIO'].get('sep',                  ',')
-        self.skiprows    = config['POSTIO'].get('skiprows',              '')
-        self.undef       = config['POSTIO'].getfloat('undef',        -9999.)
-        self.swthr       = config['POSTIO'].getfloat('swthr',           10.)
-        self.outputfile  = config['POSTIO'].get('outputfile'             '')
-        self.outputname  = config['POSTIO'].get('outputname'             '')
-        self.outundef    = config['POSTIO'].getboolean('outundef',    False)
-        self.outflagcols = config['POSTIO'].getboolean('outflagcols', False)
+        #self.eufluxfile  = gppdDiccionario['eufluxfile']
+        self.timeformat  = gppdDiccionario['timeformat']
+        self.sep         = gppdDiccionario['sep']
+        self.skiprows    = gppdDiccionario['skiprows']
+        self.undef       = gppdDiccionario['undef']
+        self.swthr       = gppdDiccionario['swthr']
+        self.outputfile  = gppdDiccionario['outputfile']
+        self.outputname  = gppdDiccionario['outputname']
+        self.outundef    = gppdDiccionario['outundef']
+        self.outflagcols = gppdDiccionario['outflagcols']
 
         # input file variables 
-        self.carbonflux     = config['POSTVAR'].get('carbonflux',          'FC')                                  
+        self.carbonflux     = gppdDiccionario['carbonflux']
                                                                                                                                           
         # remove information on a variable 
-        self.remove_SW_IN   = config['POSTVAR'].getboolean('remove_SW_IN', False)                               
+        self.remove_SW_IN   = gppdDiccionario['remove_SW_IN']
                                                                                                        
         # mad parameters
-        self.nscan = config['POSTMAD'].getint('nscan', 15)
-        self.nfill = config['POSTMAD'].getint('nfill',  1)
-        self.z     = config['POSTMAD'].getfloat('z',    7)
-        self.deriv = config['POSTMAD'].getint('deriv',  2)
+        self.nscan = gppdDiccionario['nscan']
+        self.nfill = gppdDiccionario['nfill']
+        self.z     = gppdDiccionario['z']
+        self.deriv = gppdDiccionario['deriv']
         
         # ustar parameters
-        self.ustarmin       = config['POSTUSTAR'].getfloat('ustarmin',          0.1)
-        self.nboot          = config['POSTUSTAR'].getint('nboot',                 1)
-        self.plateaucrit    = config['POSTUSTAR'].getfloat('plateaucrit',      0.95)
-        self.seasonout      = config['POSTUSTAR'].getboolean('seasonout',     False)                                                    
-        self.applyustarflag = config['POSTUSTAR'].getboolean('applyustarflag', True)
+        self.ustarmin       = gppdDiccionario['ustarmin']
+        self.nboot          = gppdDiccionario['nboot']
+        self.plateaucrit    = gppdDiccionario['plateaucrit']
+        self.seasonout      = gppdDiccionario['seasonout']
+        self.applyustarflag = gppdDiccionario['applyustarflag']
 
         # gap-filling parameters
-        self.sw_dev  = config['POSTGAP'].getfloat('sw_dev',  50.)
-        self.ta_dev  = config['POSTGAP'].getfloat('ta_dev',  2.5)
-        self.vpd_dev = config['POSTGAP'].getfloat('vpd_dev', 5.0)
-        self.longgap = config['POSTGAP'].getint('longgap',   60)
+        self.sw_dev  = gppdDiccionario['sw_dev']
+        self.ta_dev  = gppdDiccionario['ta_dev']
+        self.vpd_dev = gppdDiccionario['vpd_dev']
+        self.longgap = gppdDiccionario['longgap']
         
         # partitioning parameters 
-        self.nogppnight = config['POSTPARTITION'].getboolean('nogppnight', False)
+        self.nogppnight = gppdDiccionario['nogppnight']
         
         # daily gpp computation parameters
-        self.carbonfluxlimit  = config['DAILYGPP'].getint('carbonfluxlimit',         100)                       
-        self.respirationlimit = config['DAILYGPP'].getint('respirationlimit',        100)                       
-        self.rolling_window_gpp   = config['DAILYGPP'].getint('rolling_window_gpp',    3)
-        self.rolling_center_gpp   = config['DAILYGPP'].getboolean('rolling_center_gpp', True)
-        self.rolling_min_periods  = config['DAILYGPP'].getint('rolling_min_periods',    1)
+        self.carbonfluxlimit  = gppdDiccionario['carbonfluxlimit']
+        self.respirationlimit = gppdDiccionario['respirationlimit']
+        self.rolling_window_gpp   = gppdDiccionario['rolling_window_gpp']
+        self.rolling_center_gpp   = gppdDiccionario['rolling_center_gpp']
+        self.rolling_min_periods  = gppdDiccionario['rolling_min_periods']
         
         # climatological footprint parameters
-        self.altitude                        = config['CLIMATOLOGICAL'].getfloat('altitude',                      '')                                
-        self.latitude                        = config['CLIMATOLOGICAL'].getfloat('latitude',                      '')                        
-        self.longitude                       = config['CLIMATOLOGICAL'].getfloat('longitude',                     '')                        
-        self.canopy_height                   = config['CLIMATOLOGICAL'].getfloat('canopy_height ',                '')                           
-        self.displacement_height             = config['CLIMATOLOGICAL'].getfloat('displacement_height',           '')                          
-        self.roughness_lenght                = config['CLIMATOLOGICAL'].getfloat('roughness_lenght ',             '')                           
-        self.instrument_height_anenometer    = config['CLIMATOLOGICAL'].getfloat('instrument_height_anenometer',  '')
-        self.instrument_height_gas_analyzer  = config['CLIMATOLOGICAL'].getfloat('instrument_height_gas_analyzer','')
+        self.altitude                        = gppdDiccionario['altitude']
+        self.latitude                        = gppdDiccionario['latitude']
+        self.longitude                       = gppdDiccionario['longitude']
+        self.canopy_height                   = gppdDiccionario['canopy_height ']
+        self.displacement_height             = gppdDiccionario['displacement_height']
+        self.roughness_lenght                = gppdDiccionario['roughness_lenght ']
+        self.instrument_height_anenometer    = gppdDiccionario['instrument_height_anenometer']
+        self.instrument_height_gas_analyzer  = gppdDiccionario['instrument_height_gas_analyzer']
         
-        self.domaint_var  = config['CLIMATOLOGICAL'].get('domaint_var','-2000,2000.,-2000.,2000.').split(',')
-        self.nxt_var      = config['CLIMATOLOGICAL'].get('nxt_var',                        '1000').split(',')
-        self.rst_var      = config['CLIMATOLOGICAL'].get('rst_var',             '20.,40.,60.,80.').split(',')
+        self.domaint_var  = gppdDiccionario['domaint_var'].split(',')
+        self.nxt_var      = gppdDiccionario['nxt_var'].split(',')
+        self.rst_var      = gppdDiccionario['rst_var'].split(',')
         for i in range(0, len(self.domaint_var)):
             self.domaint_var[i] = float(self.domaint_var[i])
         for i in range(0, len(self.rst_var)):
             self.rst_var[i] = float(self.rst_var[i])
         
-        self.projection_site_UTM_zone        = config['CLIMATOLOGICAL'].get('projection_site_UTM_zone', '')     
+        self.projection_site_UTM_zone        = gppdDiccionario['projection_site_UTM_zone']     
         self.projection_site                 = '+proj=utm +zone=' + self.projection_site_UTM_zone + ' +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'       
-        self.boundary_layer_height           = config['CLIMATOLOGICAL'].getfloat('boundary_layer_height',     '1500')
+        self.boundary_layer_height           = gppdDiccionario['boundary_layer_height']
         
         # vegetation indices parameters  bands = 
-        self.bands                           = config['VI'].get('bands','NDVI,EVI,EVI2,CLr,MNDVI,MNDWI,LSWI,NDII').split(',')
+        self.bands                           = gppdDiccionario['bands'].split(',')
         for i in range(0, len(self.bands)):
             self.bands[i] = str(self.bands[i])
         
-        self.max_cloud_coverage              = config['VI'].getint('max_cloud_coverage',         100)           #Default: No filter, all images available.
-        self.crs                             = config['VI'].get('crs',                            '')           #EPSG:4326
-        self.ndviMask                        = config['VI'].getfloat('ndviMask',                -100)           #Default: No mask
-        self.mndviMask                       = config['VI'].getfloat('mndviMask',               -100)           #Default: No mask
+        self.max_cloud_coverage              = gppdDiccionario['max_cloud_coverage']           #Default: No filter, all images available.
+        self.crs                             = gppdDiccionario['crs']           #EPSG:4326
+        self.ndviMask                        = gppdDiccionario['ndviMask']           #Default: No mask
+        self.mndviMask                       = gppdDiccionario['mndviMask']           #Default: No mask
     
         # environmental vegetation parameters
-        self.rolling_window_ev_meteo         = config['EV'].getint('rolling_window_ev_meteo',            3)
-        self.rolling_window_ev_meteo_sat     = config['EV'].getint('rolling_window_ev_meteo_sat',        3)
-        self.rolling_window_gpp_MODIS        = config['EV'].getint('rolling_window_gpp_MODIS',           3)
-        self.precipitation_data              = config['EV'].get('precipitation_data',                   '').split(',')
-        self.scale_satellite_data            = config['EV'].getint('scale_satellite_data',             100)
+        self.rolling_window_ev_meteo         = gppdDiccionario['rolling_window_ev_meteo']
+        self.rolling_window_ev_meteo_sat     = gppdDiccionario['rolling_window_ev_meteo_sat']
+        self.rolling_window_gpp_MODIS        = gppdDiccionario['rolling_window_gpp_MODIS']
+        self.precipitation_data              = gppdDiccionario['precipitation_data'].split(',')
+        self.scale_satellite_data            = gppdDiccionario['scale_satellite_data']
         
         # model parameters 
-        self.model_name                      = config['MODEL'].getint('model_name',                      1)
+        self.model_name                      = gppdDiccionario['model_name']
         
         # mapping parameters
-        self.feature_collection              = config['MAPS'].get('feature_collection',                '')   
-        self.ecosystem_extension             = config['MAPS'].getint('ecosystem_extension',          5000) 
-        self.number_clusters                 = config['MAPS'].getint('number_clusters',                 4) 
-        self.training_scale                  = config['MAPS'].getint('training_scale',                100)
-        self.training_dataset                = config['MAPS'].getint('training_dataset',             1000)
-        self.scale_getRegion                 = config['MAPS'].getint('scale_getRegion',               100)
-        self.vector_scale                    = config['MAPS'].getint('vector_scale',                  100)
+        self.feature_collection              = gppdDiccionario['feature_collection']   
+        self.ecosystem_extension             = gppdDiccionario['ecosystem_extension'] 
+        self.number_clusters                 = gppdDiccionario['number_clusters'] 
+        self.training_scale                  = gppdDiccionario['training_scale']
+        self.training_dataset                = gppdDiccionario['training_dataset']
+        self.scale_getRegion                 = gppdDiccionario['scale_getRegion']
+        self.vector_scale                    = gppdDiccionario['vector_scale']
         
         # constant variables
         self.calculated_gpp         = False

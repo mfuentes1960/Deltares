@@ -155,223 +155,362 @@ import urllib.request
 
 from GppTools import Gpp as gpp
 
-#The workflow start here
-if __name__ == '__main__':
-    t1 = ptime.time()
+# pywps_service.py
+from flask import Flask, request, jsonify
+
+# Configuración de Django
+from django.conf import settings
+
+# settings.configure()  # Si estás utilizando esto, asegúrate de que se configure antes de intentar acceder a las configuraciones.
+
+from django import setup
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "P003_GPP_WPS.settings")
+setup()
+from PA003_GPP_WPS.models import Pa001PostgisMyuploadfile, Pa001PostgisMeteouploadfile, Pa001PostgisGppd, Pa001PostgisResultfile, Pa001PostgisImagefile
+import psycopg2
+import sys
+from io import SEEK_CUR, BytesIO, StringIO
+from django.utils import timezone
+
+app = Flask(__name__)
+
+@app.route('/pywps', methods=['POST'])
+
+def pywps_service():
+    # Procesa los datos recibidos desde el formulario Django
+    archivos_recibidos = request.files
+    i = 0
+    #for nombre_archivo, archivo in archivos_recibidos.items():
+    #        contenido = archivo.read()
+    #        print(nombre_archivo)
+    #        print("linea 186")
+    #        print("")
+    #        if i==2:
+    #            print(contenido) 
+    #        i+=1
+     
+    # Realiza las operaciones necesarias con los datos
+    # ...
     
-    #0)    Inicialize code
-    dgpp = gpp()
-
-    #*************************************************************************************************************************************************************************
-    #1a)   Read configuration file
-    print('1a)  Opening configuration file')
     
-    #1a.a) Read from command-line interpreter (It must include in the cosole "Deltares_GPP.py Configuration_file.cfg" located in the same adress)
-    #if len(sys.argv) <= 1:
-    #   raise IOError('Input configuration file must be given.')
-    #configfile = sys.argv[1]                                                                              
-                                                                                                       
-    #1a.b) Read from directory path
-    configfilepath = 'Configs/Configuration_file_Germany.cfg'                                                
-    
-    #1a.c) Read from gui window. Activate to manually select the congifuration file
-    #configfile = hf.files_from_gui(initialdir='.', title='configuration file')                                                                       
-
-    #1b)   Read file to retrieve file directories and model's marameters 
-    print('1b)  Reading configuration file')
-
-    dgpp.read_parameters(configfilepath)
-
-    
-    #*************************************************************************************************************************************************************************
-    if not dgpp.calculated_gpp:
-    #*************************************************************************************************************************************************************************
-        #2)   Setting data frames
-        print('2)   Formatting data frames')
-        t01 = ptime.time()
-
-        #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        #2.a)   Read eddy covariance files (eufluxfiles)
-        nee_file = dgpp.read_nee_file(dgpp.inputdir,dgpp.eufluxfile,dgpp.skiprows, dgpp.timeformat, dgpp.sep)
-
-        #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        #2.b)   Ensure constant 30-minute frequency in the datasets
-        nee_file = dgpp.set_constant_timestep(nee_file)    
-
-        #---------------------------------------------------------------------------------------------------------------------------------------------------------------------        
-        #2.c)   Formatting the input file    
-        nee_file, nee_file_flags = dgpp.format_nee_file(nee_file, dgpp.undef, dgpp.swthr, dgpp.remove_SW_IN)
-
-        #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        t02   = ptime.time()  
-        dgpp.time_counting(t01, t02, 'Computation setting data frames in ')
-
-        #********************************************************************************************************************************************************************* 
-        # 3)   Outlier detection
-        if dgpp.outlier:
-            print('3)   Spike detection \n')
-            t11 = ptime.time()
-            
-            nee_file_flags, sflag = dgpp.outlier_detection(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.nscan, dgpp.ntday, dgpp.nfill, dgpp.z, dgpp.deriv)
-
-            t12   = ptime.time()                                                                           
-            dgpp.time_counting(t11, t12, 'Computation setting data frames in ')
-
-        #********************************************************************************************************************************************************************* 
-        # 4) u* filtering (data for a full year)
-        if  dgpp.ustar:                                                                                         
-            print('4)   u* filtering \n')
-            t21 = ptime.time()
-
-            nee_file, nee_file_flags = dgpp.frictionvelocity_filter(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.ustarmin, dgpp.nboot, dgpp.plateaucrit, dgpp.seasonout, dgpp.applyustarflag)
-
-            t22   = ptime.time()
-            dgpp.time_counting(t21, t22, 'Computation u* filtering detection in ')                                                                           
-
-        #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        # 4)   u* filtering (data for partial year)
-        if  dgpp.ustar_non_annual :                                                                             
-            print('4)   u* filtering (less than 1-year data) \n')                                          
-            t21 = ptime.time()    
-
-            nee_file, nee_file_flags = dgpp.frictionvelocity_filter_nonannual(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.ustarmin, sflag, dgpp.applyustarflag)                                                                         
-
-            t22   = ptime.time() 
-            dgpp.time_counting(t21, t22, 'Computation u* filtering detection in ')  
-
-        #********************************************************************************************************************************************************************* 
-        # 5)   Flux partitioning
-        if dgpp.partition:
-            print('5)   Flux partitioning \n')
-            t31 = ptime.time()
-
-            nee_file, nee_file_flags = dgpp.flux_partition(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.nogppnight)
-
-            t32   = ptime.time()
-            dgpp.time_counting(t31, t32, 'Computation flux partitioning detection in ')  
-
-        #********************************************************************************************************************************************************************* 
-        # 6)   Gap-filling
-        if dgpp.fill:        
-            print('6)   Gap-filling \n')
-            t41 = ptime.time()
-
-            nee_file, nee_file_flags = dgpp.fill_gaps(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.sw_dev, dgpp.ta_dev, dgpp.vpd_dev, dgpp.longgap)
-
-            t42   = ptime.time()    
-            dgpp.time_counting(t41, t42, 'Computation filling gaps detection in ')                              
-
-        #********************************************************************************************************************************************************************* 
-        # 7)   Error estimate
-        if dgpp.fluxerr:
-            print('7)   Flux error estimates \n')
-            t51 = ptime.time()
-
-            nee_file, nee_file_flags = dgpp.estimate_error(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.sw_dev, dgpp.ta_dev, dgpp.vpd_dev, dgpp.longgap)
-
-            t52   = ptime.time() 
-            dgpp.time_counting(t51, t52, 'Computation flux error estimates in ')                                                                            
-
-        #********************************************************************************************************************************************************************* 
-        # 8)   Output
-        print('8)   Outputfile \n')
-        t61 = ptime.time()
-
-        dgpp.write_gpp_files(nee_file, nee_file_flags, configfilepath, dgpp.ID, dgpp.outputdir, dgpp.outputfile, dgpp.outputname, dgpp.tkelvin, dgpp.vpdpa, dgpp.undef, dgpp.outundef, dgpp.outflagcols)
-
-        t62   = ptime.time()
-        dgpp.time_counting(t61, t62, 'Creating output file in ')  
-
-        #*********************************************************************************************************************************************************************
-        # Next elements are complement modules to compute Remote Sensing empirical models of GPP           
-        #*********************************************************************************************************************************************************************
-        # 9)   Daily estimations 
-        if dgpp.daily_gpp:                                                                                       
-            print('9)   Daily GPP \n')
-            t71 = ptime.time()
-
-            gpp_file = dgpp.estimate_daily_gpp(nee_file, dgpp.carbonflux, dgpp.carbonfluxlimit, dgpp.respirationlimit, dgpp.undef, dgpp.rolling_window_gpp, dgpp.rolling_center_gpp, dgpp.rolling_min_periods, dgpp.outputdir, dgpp.ID)
-
-            t72   = ptime.time()
-            dgpp.time_counting(t71, t72, ' Computed daily GPP in ')  
-
-    #*************************************************************************************************************************************************************************
-    if dgpp.calculated_gpp:
-    #*************************************************************************************************************************************************************************
-        #2)   Setting data fram
-        print('2-9) Reading GPP file \n')
-        t01 = ptime.time()
-
-        nee_file, gpp_file = dgpp.read_daily_gpp_files(dgpp.outputdir, dgpp.outputfile, dgpp.ID, dgpp.outputname, dgpp.timeformat)
+    #The workflow start here
+    if __name__ == '__main__':
+        t1 = ptime.time()
         
-        t02   = ptime.time()   
-        dgpp.time_counting(t01, t02, 'Reading file in ')                                                                              
-            
-    #*************************************************************************************************************************************************************************
-    t2   = ptime.time() 
-    dgpp.time_counting(t1, t2, 'Total time processing carbon data ')    
+        #0)    Inicialize code
+        dgpp = gpp()
 
-    #*********************************************************************************************************************************************************************     
-    if dgpp.climatological_footprint:
+        #*************************************************************************************************************************************************************************
+        #1a)   Read configuration file
+        print('1a)  Opening configuration file')
         
-        print('10)  Climatological footprint \n')
-        t81 = ptime.time()
+        #1a.a) Read from command-line interpreter (It must include in the cosole "Deltares_GPP.py Configuration_file.cfg" located in the same adress)
+        #if len(sys.argv) <= 1:
+        #   raise IOError('Input configuration file must be given.')
+        #configfile = sys.argv[1]                                                                              
+                                                                                                        
+        #1a.b) Read from directory path
+        configfilepath = 'Configs/Configuration_file_Germany.cfg'                                                
+        
+        #1a.c) Read from gui window. Activate to manually select the congifuration file
+        #configfile = hf.files_from_gui(initialdir='.', title='configuration file')                                                                       
 
-        years, fetch, footprint = dgpp.calculate_cf(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.instrument_height_anenometer, dgpp.displacement_height, dgpp.roughness_lenght, dgpp.outputdir, dgpp.ID,dgpp.boundary_layer_height,dgpp.latitude,dgpp.longitude,dgpp.calculated_ffp,dgpp.domaint_var,dgpp.nxt_var,dgpp.rst_var,dgpp.projection_site)
+        #1b)   Read file to retrieve file directories and model's marameters 
+        print('1b)  Reading configuration file')
 
-        t82   = ptime.time()
-        dgpp.time_counting(t81, t82, 'Computation climatological footprint in ')     
+        gppdDiccionario={ "id_option":                                request.form.get("id_option"),
+                              "description":                              request.form.get("description"),
+                              "unit":                                     request.form.get("unit"),
+                              "user":                                     request.form.get("user"),                         
+                              "outputdir":                                request.form.get("outputdir"),
+                              "outlier":                             bool(request.form.get("outlier")),
+                              "ustar":                               bool(request.form.get("ustar")),
+                              "ustar_non_annual":                    bool(request.form.get("ustar_non_annual")),
+                              "partition":                           bool(request.form.get("partition")),
+                              "fill":                                bool(request.form.get("fill")),
+                              "fluxerr":                             bool(request.form.get("fluxerr")),
+                              "daily_gpp":                           bool(request.form.get("daily_gpp")),
+                              "climatological_footprint":            bool(request.form.get("climatological_footprint")),
+                              "calculated_ffp":                      bool(request.form.get("calculated_ffp")),
+                              "vegetation_indices":                  bool(request.form.get("vegetation_indices")),
+                              "environmental_variables_station":     bool(request.form.get("environmental_variables_station")),
+                              "environmental_variables_satellite":   bool(request.form.get("environmental_variables_satellite")),
+                              "tower_observations":                  bool(request.form.get("tower_observations")),
+                              "df_rainfall_station_switch":          bool(request.form.get("df_rainfall_station_switch")),
+                              "df_meteo_station_switch":             bool(request.form.get("df_meteo_station_switch")),
+                              "df_rainfall_CHIRPS_switch":           bool(request.form.get("df_rainfall_chirps_switch")),
+                              "df_temp_MODIS_switch":                bool(request.form.get("df_temp_modis_switch")),
+                              "df_meteo_tower_switch":               bool(request.form.get("df_meteo_tower_switch")),                                                  
+                              "correlation_analysis":                bool(request.form.get("correlation_analysis")),
+                              "correlation_analysis_simple":         bool(request.form.get("correlation_analysis_simple")),
+                              "rei_gpp_switch":                      bool(request.form.get("rei_gpp_switch")),
+                              "fal_gpp_switch":                      bool(request.form.get("fal_gpp_switch")),
+                              "las_gpp_switch":                      bool(request.form.get("las_gpp_switch")),
+                              "calibration_validation":              bool(request.form.get("calibration_validation")),
+                              "MODIS_analysis":                      bool(request.form.get("modis_analysis")),
+                              "timeseries_thirty":                   bool(request.form.get("timeseries_thirty")),
+                              "timeseries_fifteen":                  bool(request.form.get("timeseries_fifteen")),
+                              "mapping_GPP":                         bool(request.form.get("mapping_gpp")),
+                              "classification_maps":                 bool(request.form.get("classification_maps")),
+                              "maps_from_features":                  bool(request.form.get("maps_from_features")),
+                              "mapping_GPP_thirty":                  bool(request.form.get("mapping_gpp_thirty")),
+                              "mapping_GPP_fifteen":                 bool(request.form.get("mapping_gpp_fifteen")),
+                              "export_maps_to_drive":                bool(request.form.get("export_maps_to_drive")),                         
+                              "timeformat":                               request.form.get("timeformat"),
+                              "sep":                                      request.form.get("sep"),
+                              "skiprows":                                 request.form.get("skiprows"),
+                              "undef":                              float(request.form.get("undef")),
+                              "swthr":                              float(request.form.get("swthr")),
+                              "outputfile":                               request.form.get("outputfile"),
+                              "outputname":                               request.form.get("outputname"),
+                              "outundef":                            bool(request.form.get("outundef")),
+                              "outflagcols":                         bool(request.form.get("outflagcols")),                         
+                              "carbonflux":                               request.form.get("carbonflux"),
+                              "remove_SW_IN":                        bool(request.form.get("remove_sw_in")),
+                              "nscan":                                int(request.form.get("nscan")),
+                              "nfill":                                int(request.form.get("nfill")),
+                              "z":                                    int(request.form.get("z")),
+                              "deriv":                                int(request.form.get("deriv")),
+                              "ustarmin":                           float(request.form.get("ustarmin")),
+                              "nboot":                                int(request.form.get("nboot")),
+                              "plateaucrit":                        float(request.form.get("plateaucrit")),
+                              "seasonout":                           bool(request.form.get("seasonout")),                        
+                              "applyustarflag":                      bool(request.form.get("applyustarflag")),
+                              "sw_dev":                             float(request.form.get("sw_dev")),
+                              "ta_dev":                             float(request.form.get("ta_dev")),
+                              "vpd_dev":                            float(request.form.get("vpd_dev")),
+                              "longgap":                              int(request.form.get("longgap")),
+                              "nogppnight":                          bool(request.form.get("nogppnight")),
+                              "carbonfluxlimit":                      int(request.form.get("carbonfluxlimit")),
+                              "respirationlimit":                     int(request.form.get("respirationlimit")),
+                              "rolling_window_gpp":                   int(request.form.get("rolling_window_gpp")),
+                              "rolling_center_gpp":                  bool(request.form.get("rolling_center_gpp")),  
+                              "rolling_min_periods":                  int(request.form.get("rolling_min_periods")),
+                              "altitude":                           float(request.form.get("altitude")),
+                              "latitude":                           float(request.form.get("latitude")),
+                              "longitude":                          float(request.form.get("longitude")),
+                              "canopy_height":                      float(request.form.get("canopy_height")),
+                              "displacement_height":                float(request.form.get("displacement_height")),
+                              "roughness_lenght":                   float(request.form.get("roughness_lenght")),
+                              "instrument_height_anenometer":       float(request.form.get("instrument_height_anenometer")),
+                              "instrument_height_gas_analyzer":     float(request.form.get("instrument_height_gas_analyzer")),
+                              "projection_site_UTM_zone":                 request.form.get("projection_site_utm_zone"),  
+                              "boundary_layer_height":                int(request.form.get("boundary_layer_height")),
+                              "domaint_var":                              request.form.get("domaint_var"),
+                              "nxt_var":                                  request.form.get("nxt_var"),
+                              "rst_var":                                  request.form.get("rst_var"),
+                              "max_cloud_coverage":                   int(request.form.get("max_cloud_coverage")),
+                              "crs":                                      request.form.get("crs"),
+                              "ndviMask":                             int(request.form.get("ndvimask")),
+                              "mndviMask":                            int(request.form.get("mndvimask")),
+                              "rolling_window_ev_meteo":              int(request.form.get("rolling_window_ev_meteo")),
+                              "rolling_window_ev_meteo_sat":          int(request.form.get("rolling_window_ev_meteo_sat")),  
+                              "rolling_window_gpp_MODIS":             int(request.form.get("rolling_window_gpp_modis")),
+                              "precipitation_data":                       request.form.get("precipitation_data"),
+                              "scale_satellite_data":                 int(request.form.get("scale_satellite_data")),
+                              "feature_collection":                       request.form.get("feature_collection"),
+                              "ecosystem_extension":                  int(request.form.get("ecosystem_extension")),
+                              "number_clusters":                      int(request.form.get("number_clusters")),
+                              "training_scale":                       int(request.form.get("training_scale")),
+                              "training_dataset":                     int(request.form.get("training_dataset")),
+                              "scale_getRegion":                      int(request.form.get("scale_getregion")),                         
+                              "vector_scale":                         int(request.form.get("vector_scale")),   
+                              "file_name":                                file_name}  
 
-    #*********************************************************************************************************************************************************************
-    if not dgpp.calculated_vi:
+
+        dgpp.read_parameters(gppdDiccionario)
+
+        
+        
+        #*************************************************************************************************************************************************************************
+        if not dgpp.calculated_gpp:
+        #*************************************************************************************************************************************************************************
+            #2)   Setting data frames
+            print('2)   Formatting data frames')
+            t01 = ptime.time()
+
+            #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #2.a)   Read eddy covariance files (eufluxfiles)
+            nee_file = dgpp.read_nee_file(dgpp.inputdir,dgpp.eufluxfile,dgpp.skiprows, dgpp.timeformat, dgpp.sep)
+
+            #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #2.b)   Ensure constant 30-minute frequency in the datasets
+            nee_file = dgpp.set_constant_timestep(nee_file)    
+
+            #---------------------------------------------------------------------------------------------------------------------------------------------------------------------        
+            #2.c)   Formatting the input file    
+            nee_file, nee_file_flags = dgpp.format_nee_file(nee_file, dgpp.undef, dgpp.swthr, dgpp.remove_SW_IN)
+
+            #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            t02   = ptime.time()  
+            dgpp.time_counting(t01, t02, 'Computation setting data frames in ')
+
+            #********************************************************************************************************************************************************************* 
+            # 3)   Outlier detection
+            if dgpp.outlier:
+                print('3)   Spike detection \n')
+                t11 = ptime.time()
+                
+                nee_file_flags, sflag = dgpp.outlier_detection(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.nscan, dgpp.ntday, dgpp.nfill, dgpp.z, dgpp.deriv)
+
+                t12   = ptime.time()                                                                           
+                dgpp.time_counting(t11, t12, 'Computation setting data frames in ')
+
+            #********************************************************************************************************************************************************************* 
+            # 4) u* filtering (data for a full year)
+            if  dgpp.ustar:                                                                                         
+                print('4)   u* filtering \n')
+                t21 = ptime.time()
+
+                nee_file, nee_file_flags = dgpp.frictionvelocity_filter(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.ustarmin, dgpp.nboot, dgpp.plateaucrit, dgpp.seasonout, dgpp.applyustarflag)
+
+                t22   = ptime.time()
+                dgpp.time_counting(t21, t22, 'Computation u* filtering detection in ')                                                                           
+
+            #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            # 4)   u* filtering (data for partial year)
+            if  dgpp.ustar_non_annual :                                                                             
+                print('4)   u* filtering (less than 1-year data) \n')                                          
+                t21 = ptime.time()    
+
+                nee_file, nee_file_flags = dgpp.frictionvelocity_filter_nonannual(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.ustarmin, sflag, dgpp.applyustarflag)                                                                         
+
+                t22   = ptime.time() 
+                dgpp.time_counting(t21, t22, 'Computation u* filtering detection in ')  
+
+            #********************************************************************************************************************************************************************* 
+            # 5)   Flux partitioning
+            if dgpp.partition:
+                print('5)   Flux partitioning \n')
+                t31 = ptime.time()
+
+                nee_file, nee_file_flags = dgpp.flux_partition(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.isday, dgpp.undef, dgpp.nogppnight)
+
+                t32   = ptime.time()
+                dgpp.time_counting(t31, t32, 'Computation flux partitioning detection in ')  
+
+            #********************************************************************************************************************************************************************* 
+            # 6)   Gap-filling
+            if dgpp.fill:        
+                print('6)   Gap-filling \n')
+                t41 = ptime.time()
+
+                nee_file, nee_file_flags = dgpp.fill_gaps(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.sw_dev, dgpp.ta_dev, dgpp.vpd_dev, dgpp.longgap)
+
+                t42   = ptime.time()    
+                dgpp.time_counting(t41, t42, 'Computation filling gaps detection in ')                              
+
+            #********************************************************************************************************************************************************************* 
+            # 7)   Error estimate
+            if dgpp.fluxerr:
+                print('7)   Flux error estimates \n')
+                t51 = ptime.time()
+
+                nee_file, nee_file_flags = dgpp.estimate_error(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.sw_dev, dgpp.ta_dev, dgpp.vpd_dev, dgpp.longgap)
+
+                t52   = ptime.time() 
+                dgpp.time_counting(t51, t52, 'Computation flux error estimates in ')                                                                            
+
+            #********************************************************************************************************************************************************************* 
+            # 8)   Output
+            print('8)   Outputfile \n')
+            t61 = ptime.time()
+
+            dgpp.write_gpp_files(nee_file, nee_file_flags, configfilepath, dgpp.ID, dgpp.outputdir, dgpp.outputfile, dgpp.outputname, dgpp.tkelvin, dgpp.vpdpa, dgpp.undef, dgpp.outundef, dgpp.outflagcols)
+
+            t62   = ptime.time()
+            dgpp.time_counting(t61, t62, 'Creating output file in ')  
+
+            #*********************************************************************************************************************************************************************
+            # Next elements are complement modules to compute Remote Sensing empirical models of GPP           
+            #*********************************************************************************************************************************************************************
+            # 9)   Daily estimations 
+            if dgpp.daily_gpp:                                                                                       
+                print('9)   Daily GPP \n')
+                t71 = ptime.time()
+
+                gpp_file = dgpp.estimate_daily_gpp(nee_file, dgpp.carbonflux, dgpp.carbonfluxlimit, dgpp.respirationlimit, dgpp.undef, dgpp.rolling_window_gpp, dgpp.rolling_center_gpp, dgpp.rolling_min_periods, dgpp.outputdir, dgpp.ID)
+
+                t72   = ptime.time()
+                dgpp.time_counting(t71, t72, ' Computed daily GPP in ')  
+
+        #*************************************************************************************************************************************************************************
+        if dgpp.calculated_gpp:
+        #*************************************************************************************************************************************************************************
+            #2)   Setting data fram
+            print('2-9) Reading GPP file \n')
+            t01 = ptime.time()
+
+            nee_file, gpp_file = dgpp.read_daily_gpp_files(dgpp.outputdir, dgpp.outputfile, dgpp.ID, dgpp.outputname, dgpp.timeformat)
+            
+            t02   = ptime.time()   
+            dgpp.time_counting(t01, t02, 'Reading file in ')                                                                              
+                
+        #*************************************************************************************************************************************************************************
+        t2   = ptime.time() 
+        dgpp.time_counting(t1, t2, 'Total time processing carbon data ')    
+
         #*********************************************************************************************************************************************************************     
-        if dgpp.vegetation_indices:
+        if dgpp.climatological_footprint:
+            
+            print('10)  Climatological footprint \n')
+            t81 = ptime.time()
 
-            print('11)   Vegetation indices time series \n')
+            years, fetch, footprint = dgpp.calculate_cf(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, dgpp.instrument_height_anenometer, dgpp.displacement_height, dgpp.roughness_lenght, dgpp.outputdir, dgpp.ID,dgpp.boundary_layer_height,dgpp.latitude,dgpp.longitude,dgpp.calculated_ffp,dgpp.domaint_var,dgpp.nxt_var,dgpp.rst_var,dgpp.projection_site)
+
+            t82   = ptime.time()
+            dgpp.time_counting(t81, t82, 'Computation climatological footprint in ')     
+
+        #*********************************************************************************************************************************************************************
+        if not dgpp.calculated_vi:
+            #*********************************************************************************************************************************************************************     
+            if dgpp.vegetation_indices:
+
+                print('11)   Vegetation indices time series \n')
+                t91 = ptime.time()
+
+                #ee.Authenticate() #For authentifications we require a Google Account registered in GEE (https://earthengine.google.com/)
+                ee.Initialize()  
+
+                # metadata parameters
+                fetch = 100*(dgpp.instrument_height_anenometer - dgpp.displacement_height) #Fetch to height ratio https://www.mdpi.com/2073-4433/10/6/299
+                                                                                #https://nicholas.duke.edu/people/faculty/katul/Matlab_footprint.html 
+
+                # create aoi
+                lon_lat         =  [dgpp.longitude, dgpp.latitude]
+                point = ee.Geometry.Point(lon_lat)
+                aoi  = point.buffer(fetch)
+
+                # create aoi
+                bbox_coordinates = aoi.bounds().coordinates().get(0)
+
+                # Extract the coordinates
+                min_x = ee.List(ee.List(bbox_coordinates).get(0)).get(0)
+                min_y = ee.List(ee.List(bbox_coordinates).get(0)).get(1)
+                max_x = ee.List(ee.List(bbox_coordinates).get(2)).get(0)
+                max_y = ee.List(ee.List(bbox_coordinates).get(2)).get(1)
+
+                # Create a geometry with the bounding box coordinates
+                bbox = ee.Geometry.Rectangle([min_x, min_y, max_x, max_y])
+
+                #df_VI_export = dgpp.calculate_VI(years, fetch, footprint, dgpp.rst_var,dgpp.longitude,dgpp.latitude,dgpp.max_cloud_coverage,dgpp.ndviMask, dgpp.mndviMask, dgpp.bands, dgpp.contourlines_frequency,dgpp.crs,dgpp.ID,dgpp.outputdir)
+                df_VI_export = dgpp.calculate_VI_with_area(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, aoi, dgpp.longitude,dgpp.latitude,dgpp.max_cloud_coverage,dgpp.ndviMask, dgpp.mndviMask, dgpp.bands,dgpp.crs,dgpp.ID,dgpp.outputdir)
+            
+                t92   = ptime.time()
+                dgpp.time_counting(t91, t92, 'Computation vegetation indices in ')   
+
+        #*********************************************************************************************************************************************************************
+        if dgpp.calculated_vi:
+            
+            print('11)   Reading vegetation indices time series file \n')
+            
             t91 = ptime.time()
 
-            #ee.Authenticate() #For authentifications we require a Google Account registered in GEE (https://earthengine.google.com/)
+            ee.Authenticate() #For authentifications we require a Google Account registered in GEE (https://earthengine.google.com/)
             ee.Initialize()  
 
-            # metadata parameters
-            fetch = 100*(dgpp.instrument_height_anenometer - dgpp.displacement_height) #Fetch to height ratio https://www.mdpi.com/2073-4433/10/6/299
-                                                                            #https://nicholas.duke.edu/people/faculty/katul/Matlab_footprint.html 
-
-            # create aoi
-            lon_lat         =  [dgpp.longitude, dgpp.latitude]
-            point = ee.Geometry.Point(lon_lat)
-            aoi  = point.buffer(fetch)
-
-            # create aoi
-            bbox_coordinates = aoi.bounds().coordinates().get(0)
-
-            # Extract the coordinates
-            min_x = ee.List(ee.List(bbox_coordinates).get(0)).get(0)
-            min_y = ee.List(ee.List(bbox_coordinates).get(0)).get(1)
-            max_x = ee.List(ee.List(bbox_coordinates).get(2)).get(0)
-            max_y = ee.List(ee.List(bbox_coordinates).get(2)).get(1)
-
-            # Create a geometry with the bounding box coordinates
-            bbox = ee.Geometry.Rectangle([min_x, min_y, max_x, max_y])
-
-            #df_VI_export = dgpp.calculate_VI(years, fetch, footprint, dgpp.rst_var,dgpp.longitude,dgpp.latitude,dgpp.max_cloud_coverage,dgpp.ndviMask, dgpp.mndviMask, dgpp.bands, dgpp.contourlines_frequency,dgpp.crs,dgpp.ID,dgpp.outputdir)
-            df_VI_export = dgpp.calculate_VI_with_area(nee_file, nee_file_flags, dgpp.carbonflux, dgpp.undef, aoi, dgpp.longitude,dgpp.latitude,dgpp.max_cloud_coverage,dgpp.ndviMask, dgpp.mndviMask, dgpp.bands,dgpp.crs,dgpp.ID,dgpp.outputdir)
-        
+            df_VI_export = dgpp.read_VI(dgpp.outputdir, dgpp.ID)
+            
             t92   = ptime.time()
-            dgpp.time_counting(t91, t92, 'Computation vegetation indices in ')   
-
-    #*********************************************************************************************************************************************************************
-    if dgpp.calculated_vi:
-        
-        print('11)   Reading vegetation indices time series file \n')
-        
-        t91 = ptime.time()
-
-        ee.Authenticate() #For authentifications we require a Google Account registered in GEE (https://earthengine.google.com/)
-        ee.Initialize()  
-
-        df_VI_export = dgpp.read_VI(dgpp.outputdir, dgpp.ID)
-        
-        t92   = ptime.time()
-        dgpp.time_counting(t91, t92, 'Reading vegetation indices time series file in ')     
-        
+            dgpp.time_counting(t91, t92, 'Reading vegetation indices time series file in ')     
+            
